@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/dbubel/passman/models"
 	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 )
@@ -16,17 +17,6 @@ const (
 	JWT_AUD        string = "passman-fc9e0"
 	PUBLIC_KEY_URL string = "https://www.googleapis.com/robot/v1/metadata/x509/securetoken@system.gserviceaccount.com"
 )
-
-type firebaseAuthResp struct {
-	Kind         string `json:"kind"`
-	LocalID      string `json:"localId"`
-	Email        string `json:"email"`
-	DisplayName  string `json:"displayName"`
-	IDToken      string `json:"idToken"`
-	Registered   bool   `json:"registered"`
-	RefreshToken string `json:"refreshToken"`
-	ExpiresIn    string `json:"expiresIn"`
-}
 
 var publicPEM map[string]string
 
@@ -50,23 +40,22 @@ func init() {
 	if err != nil {
 		log.Println(err.Error())
 	}
-	// fmt.Println(publicPEM)
 }
 
 func AuthUser(c *gin.Context) {
 	var publicKey *rsa.PublicKey
 	var tok *jwt.Token
 	var err error
-	var a firebaseAuthResp
+	var firebaseResp models.FirebaseAuthResp
 
-	if err = c.BindJSON(&a); err != nil {
+	if err = c.BindJSON(&firebaseResp); err != nil {
 		log.Println(err.Error())
 		c.Abort()
 		return
 	}
 
 	for _, pem := range publicPEM {
-		tok, err = jwt.Parse(a.IDToken, func(token *jwt.Token) (interface{}, error) {
+		tok, err = jwt.Parse(firebaseResp.IDToken, func(token *jwt.Token) (interface{}, error) {
 			publicKey, err = jwt.ParseRSAPublicKeyFromPEM([]byte(pem))
 			return publicKey, err
 		})
@@ -97,4 +86,14 @@ func AuthUser(c *gin.Context) {
 		c.Abort()
 		return
 	}
+	c.Set("claimsMap", tok.Claims.(jwt.MapClaims))
+	// var fw models.FirebaseAuthResp
+	b, err := json.Marshal(&firebaseResp)
+	if err != nil {
+		log.Println(err.Error())
+	}
+	c.Set("firebaseJSON", b)
+	c.Next()
+	// fmt.Println("HERE", tok.Claims.(jwt.MapClaims)["aud"].(string))
+	// c.Set("token", tok.Claims.(jwt.MapClaims)["aud"].(string))
 }

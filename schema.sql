@@ -1,15 +1,16 @@
 
-CREATE DATABASE IF NOT EXISTS `passman` /*!40100 DEFAULT CHARACTER SET utf8 */;
-
 CREATE TABLE IF NOT EXISTS `users` (
   `user_id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `local_id` VARCHAR(32) NOT NULL,
   PRIMARY KEY (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-CREATE TABLE IF NOT EXISTS `account_data` (
-    `account_data_id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+CREATE TABLE IF NOT EXISTS `accounts` (
+  `accounts_id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `user_id` INT UNSIGNED NOT NULL,
-  PRIMARY KEY (`account_data_id`),
+  `service_name` VARCHAR(32) NOT NULL,
+  `username` VARCHAR(32) NOT NULL,
+  `password` VARCHAR(32) NOT NULL,
+  PRIMARY KEY (`accounts_id`),
   FOREIGN KEY (`user_id`) REFERENCES users(`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
