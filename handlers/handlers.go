@@ -2,8 +2,8 @@ package handlers
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
-	"os"
 	"strings"
 
 	"github.com/dbubel/passman/middleware"
@@ -15,29 +15,33 @@ import (
 // GetEngine returns gin engine with routes
 func GetEngine(authHandler func(*gin.Context), db *sqlx.DB) *gin.Engine {
 	var router *gin.Engine
-	if os.Getenv("TEST") != "" {
-		router = gin.New()
-	} else {
-		router = gin.Default()
-	}
 
-	credAPI := router.Group("/cred")
-	credAPI.Use(authHandler)
+	router = gin.Default()
+	credentialsAPI := router.Group("/credentials")
+	credentialsAPI.Use(authHandler)
 	{
-		credAPI.POST("/add", addCredential(db))
-		credAPI.PUT("/update/:credId", updateCredential)
-		credAPI.GET("/get", getCredential)
-		credAPI.GET("/get/:credId", getCredential)
-		credAPI.DELETE("/delete/:credId", deleteCredential)
-
-		credAPI.DELETE("/user", deleteUser(db))
+		credentialsAPI.POST("/add", addCredential(db))
+		// credentialsAPI.PUT("/update/:credId", updateCredential)
+		// credentialsAPI.GET("/get", getCredential)
+		// credentialsAPI.GET("/get/:credId", getCredential)
+		// credentialsAPI.DELETE("/delete/:credId", deleteCredential)
 	}
 
-	router.POST("/user", addUser, middleware.AddUserDB(db))
+	userAPI := router.Group("/user")
+	userAPI.Use(authHandler)
+	{
+		userAPI.DELETE("/delete", deleteUser, middleware.DeleteUserDB(db))
+	}
+
+	publicAPI := router.Group("/public")
+	publicAPI.POST("/user", addUser, middleware.AddUserDB(db))
+
 	return router
 }
 
 func addUser(c *gin.Context) {
+	log.Println("IN USER ADD")
+	// Make firebase call
 	url := "https://www.googleapis.com/identitytoolkit/v3/relyingparty/signupNewUser?key=AIzaSyBItfzjx74wXWCet-ARldNNpKIZVR1PQ5I%0A"
 	req, _ := http.NewRequest("POST", url, c.Request.Body)
 	res, err := http.DefaultClient.Do(req)
@@ -48,43 +52,66 @@ func addUser(c *gin.Context) {
 	}
 
 	if res.StatusCode != http.StatusOK {
-		var a interface{}
-		json.NewDecoder(res.Body).Decode(&a)
+		var fbResp interface{}
+		json.NewDecoder(res.Body).Decode(&fbResp)
 		defer res.Body.Close()
-		c.JSON(res.StatusCode, a)
+		c.JSON(res.StatusCode, fbResp)
 		c.Abort()
 		return
 	}
-	var f models.FirebaseAuthResp
-	json.NewDecoder(res.Body).Decode(&f)
-	c.Set("localId", f.LocalID)
-	c.Next()
 
+	var fbJson models.FirebaseAuthResp
+	err = json.NewDecoder(res.Body).Decode(&fbJson)
+	if err != nil {
+		log.Println(err.Error())
+	}
+	c.Set(models.FbJSON, fbJson)
+	c.Next()
 }
 
-func deleteUser(db *sqlx.DB) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		url := "https://www.googleapis.com/identitytoolkit/v3/relyingparty/deleteAccount?key=AIzaSyBItfzjx74wXWCet-ARldNNpKIZVR1PQ5I%0A"
-		idToken, ok := c.Get("firebaseJSON")
-		if !ok {
-			c.JSON(http.StatusInternalServerError, nil)
-			return
-		}
+func deleteUser(c *gin.Context) {
+	var f models.FirebaseAuthResp
+	url := "https://www.googleapis.com/identitytoolkit/v3/relyingparty/deleteAccount?key=AIzaSyBItfzjx74wXWCet-ARldNNpKIZVR1PQ5I%0A"
 
-		payload := strings.NewReader(string(idToken.([]byte)))
-		req, _ := http.NewRequest("POST", url, payload)
-		res, err := http.DefaultClient.Do(req)
-
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-			return
-		}
-
-		var f models.FirebaseAuthResp
-		json.NewDecoder(res.Body).Decode(&f)
-		c.JSON(res.StatusCode, f)
-		res.Body.Close()
+	idToken, ok := c.Get("firebaseJSON")
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not get firebaseJSON"})
+		c.Abort()
+		return
 	}
+
+	payload := strings.NewReader(string(idToken.([]byte)))
+	req, _ := http.NewRequest("POST", url, payload)
+	res, err := http.DefaultClient.Do(req)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.Abort()
+		return
+	}
+
+	var fbResp interface{}
+	json.NewDecoder(res.Body).Decode(&fbResp)
+	if res.StatusCode != http.StatusOK {
+		defer res.Body.Close()
+		c.JSON(res.StatusCode, fbResp)
+		c.Abort()
+		return
+	}
+
+	err = json.NewDecoder(strings.NewReader(string(idToken.([]byte)))).Decode(&f)
+	defer res.Body.Close()
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.Abort()
+		return
+	}
+
+	c.Set(models.LocalID, f.LocalID)
+	c.Set(models.FirebaseResp, fbResp)
+	c.Next()
+
 }
 
 func addCredential(db *sqlx.DB) gin.HandlerFunc {
