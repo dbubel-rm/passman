@@ -6,8 +6,8 @@ import (
 	"os"
 	"strings"
 
+	"github.com/dbubel/passman/middleware"
 	"github.com/dbubel/passman/models"
-
 	"github.com/gin-gonic/gin"
 	"github.com/jmoiron/sqlx"
 )
@@ -33,26 +33,33 @@ func GetEngine(authHandler func(*gin.Context), db *sqlx.DB) *gin.Engine {
 		credAPI.DELETE("/user", deleteUser(db))
 	}
 
-	router.POST("/user", addUser(db))
+	router.POST("/user", addUser, middleware.AddUserDB(db))
 	return router
 }
 
-func addUser(db *sqlx.DB) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		url := "https://www.googleapis.com/identitytoolkit/v3/relyingparty/signupNewUser?key=AIzaSyBItfzjx74wXWCet-ARldNNpKIZVR1PQ5I%0A"
-		req, _ := http.NewRequest("POST", url, c.Request.Body)
-		res, err := http.DefaultClient.Do(req)
+func addUser(c *gin.Context) {
+	url := "https://www.googleapis.com/identitytoolkit/v3/relyingparty/signupNewUser?key=AIzaSyBItfzjx74wXWCet-ARldNNpKIZVR1PQ5I%0A"
+	req, _ := http.NewRequest("POST", url, c.Request.Body)
+	res, err := http.DefaultClient.Do(req)
 
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-			return
-		}
-
-		var f models.FirebaseAuthResp
-		json.NewDecoder(res.Body).Decode(&f)
-		c.JSON(res.StatusCode, f)
-		res.Body.Close()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
 	}
+
+	if res.StatusCode != http.StatusOK {
+		var a interface{}
+		json.NewDecoder(res.Body).Decode(&a)
+		defer res.Body.Close()
+		c.JSON(res.StatusCode, a)
+		c.Abort()
+		return
+	}
+	var f models.FirebaseAuthResp
+	json.NewDecoder(res.Body).Decode(&f)
+	c.Set("localId", f.LocalID)
+	c.Next()
+
 }
 
 func deleteUser(db *sqlx.DB) gin.HandlerFunc {
