@@ -31,10 +31,9 @@ func AddUserDB(db *sqlx.DB) gin.HandlerFunc {
 
 func DeleteUserDB(db *sqlx.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		localID, localIDExist := c.Get(models.LocalID)
-		fbResp, fbRespExist := c.Get(models.FirebaseResp)
+		localID, localIDExist := c.Get("userID")
 
-		if localIDExist && fbRespExist {
+		if localIDExist {
 			_, err := db.NamedExec(`DELETE FROM users where local_id = :local_id`,
 				map[string]interface{}{
 					"local_id": localID,
@@ -43,7 +42,34 @@ func DeleteUserDB(db *sqlx.DB) gin.HandlerFunc {
 				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 				return
 			}
-			c.JSON(http.StatusOK, fbResp)
+			c.JSON(http.StatusOK, gin.H{"status": "User deleted"})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Context parameters not present"})
+		return
+	}
+}
+
+// UserID      int       `json:"userId"`
+// ServiceName string    `json:"serviceName"`
+// Username    string    `json:"username"`
+// Password    string    `json:"password"`
+// UpdatedAt   time.Time `json:"updatedAt"`
+// CreatedAt   time.Time `json:"createdAt"`
+// DeletedAt   time.Time `json:"deletedAt"`
+
+func AddCredentialDB(db *sqlx.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		// localID, localIDExist := c.Get("userID")
+		credentials, a := c.Get("credentials")
+
+		if a {
+			_, err := db.NamedExec(`INSERT INTO credentials (user_id, service_name, username, password) values (:user_id, :service_name, :username,:password)`, credentials)
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+				return
+			}
+			c.JSON(http.StatusOK, gin.H{"status": "Credential added"})
 			return
 		}
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Context parameters not present"})

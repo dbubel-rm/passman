@@ -6,8 +6,8 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strings"
 
-	"github.com/dbubel/passman/models"
 	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 )
@@ -46,16 +46,19 @@ func AuthUser(c *gin.Context) {
 	var publicKey *rsa.PublicKey
 	var tok *jwt.Token
 	var err error
-	var firebaseResp models.FirebaseAuthResp
 
-	if err = c.BindJSON(&firebaseResp); err != nil {
-		log.Println(err.Error())
+	token := strings.Split(c.GetHeader("Authorization"), "Bearer ")
+
+	if len(token) != 2 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid auth header"})
 		c.Abort()
 		return
 	}
 
+	s := strings.Replace(token[1], " ", "", -1)
+
 	for _, pem := range publicPEM {
-		tok, err = jwt.Parse(firebaseResp.IDToken, func(token *jwt.Token) (interface{}, error) {
+		tok, err = jwt.Parse(s, func(token *jwt.Token) (interface{}, error) {
 			publicKey, err = jwt.ParseRSAPublicKeyFromPEM([]byte(pem))
 			return publicKey, err
 		})
@@ -70,30 +73,30 @@ func AuthUser(c *gin.Context) {
 	// No valid jwt was found
 	if err != nil {
 		c.Abort()
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error":       err.Error(),
+			"description": "Error validating jwt",
+		})
 		return
 	}
 
 	iss, ok := tok.Claims.(jwt.MapClaims)["iss"].(string)
 	if iss != JWT_ISSUER || !ok {
-		log.Println("Invalid iss claim")
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid ISS"})
 		c.Abort()
 		return
 	}
 
 	aud, ok := tok.Claims.(jwt.MapClaims)["aud"].(string)
 	if aud != JWT_AUD || !ok {
-		log.Println("Invalid aud claim")
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid AUD"})
 		c.Abort()
 		return
 	}
-	c.Set("claimsMap", tok.Claims.(jwt.MapClaims))
-	// var fw models.FirebaseAuthResp
-	b, err := json.Marshal(&firebaseResp)
-	if err != nil {
-		log.Println(err.Error())
-	}
-	c.Set("firebaseJSON", b)
+	// c.Set("claimsMap", tok.Claims.(jwt.MapClaims))
+	log.Println(tok.Claims.(jwt.MapClaims))
+	c.Set("userID", tok.Claims.(jwt.MapClaims)["user_id"])
+	c.Set("email", tok.Claims.(jwt.MapClaims)["email"])
+	c.Set("jwt", s)
 	c.Next()
-	// fmt.Println("HERE", tok.Claims.(jwt.MapClaims)["aud"].(string))
-	// c.Set("token", tok.Claims.(jwt.MapClaims)["aud"].(string))
 }

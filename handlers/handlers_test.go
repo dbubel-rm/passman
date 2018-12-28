@@ -1,8 +1,8 @@
 package handlers
 
 import (
-	"bytes"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"net/http/httptest"
@@ -67,23 +67,14 @@ func TestAddUser(t *testing.T) {
 func TestDeleteUser(t *testing.T) {
 	db := resetDB(false)
 	testEngine := GetEngine(middleware.AuthUser, db)
-	// Encode the new user we got so we can now delete it
-	b := new(bytes.Buffer)
-	err := json.NewEncoder(b).Encode(a)
-	assert.NoError(t, err)
 
-	req, err := http.NewRequest("DELETE", "/user/delete", strings.NewReader(b.String()))
+	m := `Bearer %s`
+
+	req, err := http.NewRequest("DELETE", "/user/delete", nil)
+	req.Header.Set("Authorization", fmt.Sprintf(m, a.IDToken))
 	assert.NoError(t, err)
 
 	resp := httptest.NewRecorder()
 	testEngine.ServeHTTP(resp, req)
 	assert.Equal(t, http.StatusOK, resp.Code)
-
-	var f models.FirebaseAuthResp
-	err = json.NewDecoder(resp.Body).Decode(&f)
-	assert.NoError(t, err)
-
-	assert.Equal(t, "identitytoolkit#DeleteAccountResponse", f.Kind)
-
-	log.Println("pass resp", f)
 }
