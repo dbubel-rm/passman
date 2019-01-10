@@ -64,6 +64,25 @@ func TestAddUser(t *testing.T) {
 	assert.Equal(t, "test@gmail.com2", a.Email)
 
 }
+func TestAddCredentials(t *testing.T) {
+	db := resetDB(false)
+	testEngine := GetEngine(middleware.AuthUser, db)
+
+	payload := strings.NewReader(`{
+		"serviceName":"gmail",
+		"username":"username",
+		"password":"password"
+	}`)
+	m := `Bearer %s`
+	req, err := http.NewRequest("POST", "/credentials/add", payload)
+	req.Header.Set("Authorization", fmt.Sprintf(m, a.IDToken))
+	assert.NoError(t, err)
+
+	resp := httptest.NewRecorder()
+	testEngine.ServeHTTP(resp, req)
+	assert.Equal(t, http.StatusOK, resp.Code)
+
+}
 func TestDeleteUser(t *testing.T) {
 	db := resetDB(false)
 	testEngine := GetEngine(middleware.AuthUser, db)

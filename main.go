@@ -20,5 +20,6 @@ func main() {
 	log.SetOutput(mw)
 	log.SetFlags(log.Ldate | log.Ltime | log.Lshortfile)
 	engine := handlers.GetEngine(middleware.AuthUser, db)
+	log.Println("Passman running...")
 	engine.Run()
 }

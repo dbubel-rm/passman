@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/dbubel/passman/models"
@@ -62,9 +63,13 @@ func AddCredentialDB(db *sqlx.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// localID, localIDExist := c.Get("userID")
 		credentials, a := c.Get("credentials")
+		u, _ := c.Get("userID") // should rename to local id
 
 		if a {
-			_, err := db.NamedExec(`INSERT INTO credentials (user_id, service_name, username, password) values (:user_id, :service_name, :username,:password)`, credentials)
+			q := fmt.Sprintf(`INSERT INTO credentials (user_id, service_name, username, password) 
+			values ( (select user_id from users where local_id = "%s"), :service_name, :username,:password)`, u)
+			_, err := db.NamedExec(q, credentials)
+
 			if err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 				return
@@ -74,5 +79,36 @@ func AddCredentialDB(db *sqlx.DB) gin.HandlerFunc {
 		}
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Context parameters not present"})
 		return
+	}
+}
+
+func GetCredentialDB(db *sqlx.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+
+		u, _ := c.Get("userID") // should rename to local id
+		serviceName := c.Param("serviceName")
+
+		fmt.Println(u, serviceName)
+
+		if serviceName == "" {
+			c.JSON(http.StatusBadRequest, gin.H{"error": ""})
+			return
+		}
+
+		jason := models.Credentials{}
+		err := db.Get(&jason, `select c.username, c.password, c.service_name 
+			from passman.users u 
+			join credentials c on u.user_id = c.user_id 
+			where c.service_name = ?
+			and u.local_id = ?`, serviceName, u)
+
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		c.JSON(http.StatusOK, jason)
+		return
+
 	}
 }

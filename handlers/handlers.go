@@ -13,17 +13,21 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
+func init() {
+	gin.SetMode(gin.ReleaseMode)
+}
+
 // GetEngine returns gin engine with routes
 func GetEngine(authHandler func(*gin.Context), db *sqlx.DB) *gin.Engine {
 	var router *gin.Engine
 
-	router = gin.Default()
+	router = gin.New()
 	credentialsAPI := router.Group("/credentials")
 	credentialsAPI.Use(authHandler)
 	{
 		credentialsAPI.POST("/add", addCredentials, middleware.AddCredentialDB(db))
 		// credentialsAPI.PUT("/update/:credId", updateCredential)
-		// credentialsAPI.GET("/get", getCredential)
+		credentialsAPI.GET("/get/:serviceName", getCredential, middleware.GetCredentialDB(db))
 		// credentialsAPI.GET("/get/:credId", getCredential)
 		// credentialsAPI.DELETE("/delete/:credId", deleteCredential)
 	}
@@ -131,5 +135,11 @@ func updateCredential(c *gin.Context) {
 }
 
 func getCredential(c *gin.Context) {
-
+	// var cred models.CredentialRequest
+	// err := c.BindJSON(&cred)
+	// if err != nil {
+	// 	log.Println(err.Error())
+	// }
+	// c.Set("credentials", cred)
+	c.Next()
 }
