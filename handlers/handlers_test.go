@@ -3,6 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"net/http/httptest"
@@ -59,7 +60,8 @@ func TestAddUser(t *testing.T) {
 	testEngine.ServeHTTP(resp, req)
 	assert.Equal(t, http.StatusOK, resp.Code)
 
-	err = json.NewDecoder(resp.Body).Decode(&a)
+	r, _ := ioutil.ReadAll(resp.Body)
+	err = json.Unmarshal(r, &a)
 	assert.NoError(t, err)
 	assert.Equal(t, "test@gmail.com2", a.Email)
 

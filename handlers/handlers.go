@@ -35,11 +35,11 @@ func GetEngine(authHandler func(*gin.Context), db *sqlx.DB) *gin.Engine {
 	userAPI := router.Group("/user")
 	userAPI.Use(authHandler)
 	{
-		userAPI.DELETE("/delete", deleteUser, middleware.DeleteUserDB(db))
+		userAPI.DELETE("/delete", deleteUser)
 	}
 
 	publicAPI := router.Group("/public")
-	publicAPI.POST("/user", addUser, middleware.AddUserDB(db))
+	publicAPI.POST("/user", addUser)
 
 	return router
 }
@@ -69,8 +69,8 @@ func addUser(c *gin.Context) {
 	if err != nil {
 		log.Println(err.Error())
 	}
-	c.Set(models.FbJSON, fbJson)
-	c.Next()
+	c.JSON(http.StatusOK, fbJson)
+	return
 }
 
 func deleteUser(c *gin.Context) {
@@ -104,10 +104,8 @@ func deleteUser(c *gin.Context) {
 		c.Abort()
 		return
 	}
-
-	// c.Set(models.LocalID, f.LocalID)
-	// c.Set(models.FirebaseResp, fbResp)
-	c.Next()
+	c.JSON(http.StatusOK, fbResp)
+	return
 
 }
 
@@ -119,11 +117,6 @@ func addCredentials(c *gin.Context) {
 	}
 	c.Set("credentials", cred)
 	c.Next()
-	// userID, _ := c.Get("userID")
-	// log.Println("CLAIMS", userID)
-
-	// c.JSON(http.StatusAccepted, cred)
-
 }
 
 func deleteCredential(c *gin.Context) {
