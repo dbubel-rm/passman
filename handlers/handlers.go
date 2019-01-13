@@ -14,14 +14,14 @@ import (
 )
 
 func init() {
-	gin.SetMode(gin.ReleaseMode)
+	gin.SetMode(gin.DebugMode)
 }
 
 // GetEngine returns gin engine with routes
 func GetEngine(authHandler func(*gin.Context), db *sqlx.DB) *gin.Engine {
 	var router *gin.Engine
 
-	router = gin.New()
+	router = gin.Default()
 	credentialsAPI := router.Group("/credentials")
 	credentialsAPI.Use(authHandler)
 	{
@@ -40,10 +40,39 @@ func GetEngine(authHandler func(*gin.Context), db *sqlx.DB) *gin.Engine {
 
 	publicAPI := router.Group("/public")
 	publicAPI.POST("/user", addUser)
+	publicAPI.POST("/authUser", authUser)
 
 	return router
 }
 
+func authUser(c *gin.Context) {
+	// Make firebase call
+	url := "https://www.googleapis.com/identitytoolkit/v3/relyingparty/verifyPassword?key=AIzaSyBItfzjx74wXWCet-ARldNNpKIZVR1PQ5I%0A"
+	req, _ := http.NewRequest("POST", url, c.Request.Body)
+	res, err := http.DefaultClient.Do(req)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	if res.StatusCode != http.StatusOK {
+		var fbResp interface{}
+		json.NewDecoder(res.Body).Decode(&fbResp)
+		defer res.Body.Close()
+		c.JSON(res.StatusCode, fbResp)
+		c.Abort()
+		return
+	}
+
+	var fbJson models.FirebaseAuthResp
+	err = json.NewDecoder(res.Body).Decode(&fbJson)
+	if err != nil {
+		log.Println(err.Error())
+	}
+	c.JSON(http.StatusOK, fbJson)
+	return
+}
 func addUser(c *gin.Context) {
 	// Make firebase call
 	url := "https://www.googleapis.com/identitytoolkit/v3/relyingparty/signupNewUser?key=AIzaSyBItfzjx74wXWCet-ARldNNpKIZVR1PQ5I%0A"
