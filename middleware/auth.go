@@ -93,9 +93,8 @@ func AuthUser(c *gin.Context) {
 		c.Abort()
 		return
 	}
-	// c.Set("claimsMap", tok.Claims.(jwt.MapClaims))
-	// log.Println(tok.Claims.(jwt.MapClaims))
-	c.Set("userID", tok.Claims.(jwt.MapClaims)["user_id"])
+
+	c.Set("localID", tok.Claims.(jwt.MapClaims)["user_id"])
 	c.Set("email", tok.Claims.(jwt.MapClaims)["email"])
 	c.Set("jwt", s)
 	c.Next()

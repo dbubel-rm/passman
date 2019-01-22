@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS `credentials` (
   `local_id` VARCHAR(29) NOT NULL,
   `service_name` VARCHAR(32) NOT NULL,
   `username` VARCHAR(32) NOT NULL,
-  `password` VARCHAR(32) NOT NULL,
+  `password` VARCHAR(128) NOT NULL,
   `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   -- `deleted_at` TIMESTAMP NULL,

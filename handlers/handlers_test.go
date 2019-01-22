@@ -26,7 +26,6 @@ func init() {
 func fakeAuth(c *gin.Context) {}
 
 func resetDB(reset bool) *sqlx.DB {
-	// db := fakeDB()
 	if reset {
 		cmdStr := "sql_util.sh"
 		cmd := exec.Command("/bin/sh", "-c", cmdStr)
@@ -76,7 +75,7 @@ func TestAddCredentials(t *testing.T) {
 		"password":"password"
 	}`)
 	m := `Bearer %s`
-	req, err := http.NewRequest("POST", "/credentials/add", payload)
+	req, err := http.NewRequest("POST", "/credential", payload)
 	req.Header.Set("Authorization", fmt.Sprintf(m, a.IDToken))
 	assert.NoError(t, err)
 
@@ -85,13 +84,32 @@ func TestAddCredentials(t *testing.T) {
 	assert.Equal(t, http.StatusOK, resp.Code)
 
 }
+
+func TestGetCredential(t *testing.T) {
+	db := resetDB(false)
+	testEngine := GetEngine(middleware.AuthUser, db)
+
+	// payload := strings.NewReader(`{
+	// 	"serviceName":"gmail",
+	// 	"username":"username",
+	// 	"password":"password"
+	// }`)
+	m := `Bearer %s`
+	req, err := http.NewRequest("GET", "/credential/gmail", nil)
+	req.Header.Set("Authorization", fmt.Sprintf(m, a.IDToken))
+	assert.NoError(t, err)
+
+	resp := httptest.NewRecorder()
+	testEngine.ServeHTTP(resp, req)
+	assert.Equal(t, http.StatusOK, resp.Code)
+}
 func TestDeleteUser(t *testing.T) {
 	db := resetDB(false)
 	testEngine := GetEngine(middleware.AuthUser, db)
 
 	m := `Bearer %s`
 
-	req, err := http.NewRequest("DELETE", "/user/delete", nil)
+	req, err := http.NewRequest("DELETE", "/user", nil)
 	req.Header.Set("Authorization", fmt.Sprintf(m, a.IDToken))
 	assert.NoError(t, err)
 

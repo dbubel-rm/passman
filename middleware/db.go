@@ -30,40 +30,32 @@ import (
 // 	}
 // }
 
-// func DeleteUserDB(db *sqlx.DB) gin.HandlerFunc {
-// 	return func(c *gin.Context) {
-// 		localID, localIDExist := c.Get("userID")
+func DeleteUserDB(db *sqlx.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		localID, localIDExist := c.Get("localID")
 
-// 		if localIDExist {
-// 			_, err := db.NamedExec(`DELETE FROM users where local_id = :local_id`,
-// 				map[string]interface{}{
-// 					"local_id": localID,
-// 				})
-// 			if err != nil {
-// 				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-// 				return
-// 			}
-// 			c.JSON(http.StatusOK, gin.H{"status": "User deleted"})
-// 			return
-// 		}
-// 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Context parameters not present"})
-// 		return
-// 	}
-// }
-
-// UserID      int       `json:"userId"`
-// ServiceName string    `json:"serviceName"`
-// Username    string    `json:"username"`
-// Password    string    `json:"password"`
-// UpdatedAt   time.Time `json:"updatedAt"`
-// CreatedAt   time.Time `json:"createdAt"`
-// DeletedAt   time.Time `json:"deletedAt"`
+		if localIDExist {
+			_, err := db.NamedExec(`DELETE FROM credentials where local_id = :local_id`,
+				map[string]interface{}{
+					"local_id": localID,
+				})
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+				return
+			}
+			c.JSON(http.StatusOK, gin.H{"status": "User deleted"})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Context parameters not present"})
+		return
+	}
+}
 
 func AddCredentialDB(db *sqlx.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// localID, localIDExist := c.Get("userID")
+
 		credentials, a := c.Get("credentials")
-		u, _ := c.Get("userID") // should rename to local id
+		u, _ := c.Get("localID") // should rename to local id
 
 		if a {
 			q := fmt.Sprintf(`INSERT INTO credentials 
@@ -86,7 +78,7 @@ func AddCredentialDB(db *sqlx.DB) gin.HandlerFunc {
 func GetCredentialDB(db *sqlx.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 
-		u, _ := c.Get("userID") // should rename to local id
+		u, _ := c.Get("localID") // should rename to local id
 		serviceName := c.Param("serviceName")
 
 		fmt.Println(u, serviceName)
@@ -97,11 +89,74 @@ func GetCredentialDB(db *sqlx.DB) gin.HandlerFunc {
 		}
 
 		jason := models.Credentials{}
-		err := db.Get(&jason, `select c.username, c.password, c.service_name 
-			from passman.users u 
-			join credentials c on u.user_id = c.user_id 
-			where c.service_name = ?
-			and u.local_id = ?`, serviceName, u)
+		q := `select username, password, service_name 
+		from credentials 
+		where service_name = ?
+		and local_id = ?`
+		err := db.Get(&jason, q, serviceName, u)
+
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		c.JSON(http.StatusOK, jason)
+		return
+
+	}
+}
+
+func DeleteCredentialDB(db *sqlx.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+
+		u, _ := c.Get("localID") // should rename to local id
+		serviceName := c.Param("serviceName")
+
+		fmt.Println(u, serviceName)
+
+		if serviceName == "" {
+			c.JSON(http.StatusBadRequest, gin.H{"error": ""})
+			return
+		}
+
+		q := `delete from credentials 
+		where service_name = :service_name
+		and local_id = :local_id`
+
+		_, err := db.NamedExec(q, map[string]interface{}{
+			"service_name": serviceName,
+			"local_id":     u,
+		})
+
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{"status": "Credential deleted"})
+		return
+
+	}
+}
+
+func GetCredentialsDB(db *sqlx.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+
+		u, _ := c.Get("localID") // should rename to local id
+		// serviceName := c.Param("serviceName")
+
+		// fmt.Println(u, serviceName)
+
+		// if serviceName == "" {
+		// 	c.JSON(http.StatusBadRequest, gin.H{"error": ""})
+		// 	return
+		// }
+
+		jason := []models.Credentials{}
+		q := `select username, password, service_name 
+		from credentials 
+		where local_id = ?`
+		err := db.Select(&jason, q, u)
 
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})

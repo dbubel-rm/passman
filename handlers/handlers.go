@@ -22,20 +22,14 @@ func GetEngine(authHandler func(*gin.Context), db *sqlx.DB) *gin.Engine {
 	var router *gin.Engine
 
 	router = gin.Default()
-	credentialsAPI := router.Group("/credentials")
-	credentialsAPI.Use(authHandler)
+	privateAPI := router.Group("/")
+	privateAPI.Use(authHandler)
 	{
-		credentialsAPI.POST("/add", addCredentials, middleware.AddCredentialDB(db))
-		// credentialsAPI.PUT("/update/:credId", updateCredential)
-		credentialsAPI.GET("/get/:serviceName", getCredential, middleware.GetCredentialDB(db))
-		// credentialsAPI.GET("/get/:credId", getCredential)
-		// credentialsAPI.DELETE("/delete/:credId", deleteCredential)
-	}
-
-	userAPI := router.Group("/user")
-	userAPI.Use(authHandler)
-	{
-		userAPI.DELETE("/delete", deleteUser)
+		privateAPI.POST("/credential", addCredentials, middleware.AddCredentialDB(db))
+		privateAPI.GET("/credential/:serviceName", getCredential, middleware.GetCredentialDB(db))
+		privateAPI.GET("/credentials", getCredential, middleware.GetCredentialsDB(db))
+		privateAPI.DELETE("/user", deleteUser, middleware.DeleteUserDB(db))
+		privateAPI.DELETE("/credential/:serviceName", deleteCredential, middleware.DeleteCredentialDB(db))
 	}
 
 	publicAPI := router.Group("/public")
@@ -73,6 +67,7 @@ func authUser(c *gin.Context) {
 	c.JSON(http.StatusOK, fbJson)
 	return
 }
+
 func addUser(c *gin.Context) {
 	// Make firebase call
 	url := "https://www.googleapis.com/identitytoolkit/v3/relyingparty/signupNewUser?key=AIzaSyBItfzjx74wXWCet-ARldNNpKIZVR1PQ5I%0A"
@@ -103,7 +98,6 @@ func addUser(c *gin.Context) {
 }
 
 func deleteUser(c *gin.Context) {
-	// var f models.FirebaseAuthResp
 	url := "https://www.googleapis.com/identitytoolkit/v3/relyingparty/deleteAccount?key=AIzaSyBItfzjx74wXWCet-ARldNNpKIZVR1PQ5I%0A"
 
 	idToken, ok := c.Get("jwt")
@@ -149,7 +143,7 @@ func addCredentials(c *gin.Context) {
 }
 
 func deleteCredential(c *gin.Context) {
-
+	c.Next()
 }
 
 func updateCredential(c *gin.Context) {
@@ -157,11 +151,5 @@ func updateCredential(c *gin.Context) {
 }
 
 func getCredential(c *gin.Context) {
-	// var cred models.CredentialRequest
-	// err := c.BindJSON(&cred)
-	// if err != nil {
-	// 	log.Println(err.Error())
-	// }
-	// c.Set("credentials", cred)
 	c.Next()
 }
