@@ -12,13 +12,13 @@ import (
 )
 
 func main() {
-	db, err := db.GetDB()
-	if err != nil {
-		log.Fatal(err.Error())
-	}
 	mw := io.MultiWriter(os.Stdout)
 	log.SetOutput(mw)
 	log.SetFlags(log.Ldate | log.Ltime | log.Lshortfile)
+	db, err := db.GetDB()
+	if err != nil {
+		log.Println(err.Error())
+	}
 	engine := handlers.GetEngine(middleware.AuthUser, db)
 	log.Println("Passman running...")
 	engine.Run()

@@ -7,9 +7,10 @@ import (
 )
 
 func GetDB() (*sqlx.DB, error) {
-	db, err := sqlx.Connect("mysql", "root:@/passman")
+	log.Println("starting DB")
+	db, err := sqlx.Connect("mysql", "passman:wtfthispasswordNeedsLonger29@tcp(production-database.cfneifgjtyib.us-east-1.rds.amazonaws.com:3306)/passman")
 	if err != nil {
-		log.Fatalln(err)
+		log.Println(err)
 	}
 	return db, err
 }
