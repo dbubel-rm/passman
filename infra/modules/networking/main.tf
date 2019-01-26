@@ -26,7 +26,6 @@ resource "aws_internet_gateway" "ig" {
   }
 }
 
-
 /* Elastic IP for NAT */
 resource "aws_eip" "nat_eip" {
   vpc        = true
@@ -113,9 +112,9 @@ resource "aws_route_table_association" "public" {
 }
 
 resource "aws_route_table_association" "private" {
-  count           = "${length(var.private_subnets_cidr)}"
-  subnet_id       = "${element(aws_subnet.private_subnet.*.id, count.index)}"
-  route_table_id  = "${aws_route_table.private.id}"
+  count          = "${length(var.private_subnets_cidr)}"
+  subnet_id      = "${element(aws_subnet.private_subnet.*.id, count.index)}"
+  route_table_id = "${aws_route_table.private.id}"
 }
 
 /*====
@@ -145,7 +144,6 @@ resource "aws_security_group" "default" {
     Environment = "${var.environment}"
   }
 }
-
 
 resource "aws_security_group" "bastion" {
   vpc_id      = "${aws_vpc.vpc.id}"

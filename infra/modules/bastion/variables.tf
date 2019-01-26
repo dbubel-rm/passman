@@ -1,21 +1,24 @@
 variable "vpc_id" {
-    description = "The VPC ID"
+  description = "The VPC ID"
 }
+
 variable "region" {
-    description = "region"
+  description = "region"
 }
+
 variable "environment" {
-    description = "The environment"
+  description = "The environment"
 }
 
 variable "key_name" {
-    description = "name of key"
+  description = "name of key"
 }
 
 variable "security_group_ids" {
-    type = "list"
-    description = "The security group collection"
+  type        = "list"
+  description = "The security group collection"
 }
+
 variable "bastion_ami" {
   default = {
     "us-east-1" = "ami-f652979b"
@@ -25,6 +28,6 @@ variable "bastion_ami" {
 }
 
 variable "public_subnet_ids" {
-    type = "list"
-    description = "asdf"
+  type        = "list"
+  description = "asdf"
 }

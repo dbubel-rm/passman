@@ -1,10 +1,9 @@
-
 locals {
   production_availability_zones = ["us-east-1a", "us-east-1b"]
 }
 
 provider "aws" {
-  region  = "${var.region}"
+  region = "${var.region}"
 }
 
 resource "aws_key_pair" "key" {
@@ -34,36 +33,41 @@ module "rds" {
   vpc_id            = "${module.networking.vpc_id}"
   instance_class    = "db.t2.micro"
 }
-module "bastion" {
-  region = "${var.region}"
-  source            = "../modules/bastion"
-  vpc_id =  "${module.networking.vpc_id}"
-  environment = "${var.environment}"
-   security_group_ids = [
-    "${module.networking.bastion}",
-    "${module.rds.db_access_sg_id}"
-  ]
-public_subnet_ids = ["${module.networking.public_subnets_id}"]
-  key_name = "production_key"
-}
-module "ecs" {
-    source = "../modules/ecs"
-    environment = "${var.environment}"
-    vpc_id = "${module.networking.vpc_id}"
-    # mysql_endpoint = "https://dynamodb.${var.region}.amazonaws.com"
-    region = "${var.region}"
-    # new_relic_app_key = "${var.new_relic_app_key}"
-    # new_relic_app_name = "${var.new_relic_app_name}"
-    # role_arn = "${var.role_arn}"
-    public_subnet_ids = ["${module.networking.public_subnets_id}"]
-    private_subnet_ids = ["${module.networking.private_subnets_id}"]
-    # security_group_ids = ["${module.networking.default_sg_id}"]
 
-   security_group_ids = [
-    "${module.networking.security_groups_ids}",
-    "${module.rds.db_access_sg_id}"
+module "bastion" {
+  region      = "${var.region}"
+  source      = "../modules/bastion"
+  vpc_id      = "${module.networking.vpc_id}"
+  environment = "${var.environment}"
+
+  security_group_ids = [
+    "${module.networking.bastion}",
+    "${module.rds.db_access_sg_id}",
   ]
-  mysql_endpoint   = "${module.rds.rds_address}"
+
+  public_subnet_ids = ["${module.networking.public_subnets_id}"]
+  key_name          = "production_key"
+}
+
+module "ecs" {
+  source      = "../modules/ecs"
+  environment = "${var.environment}"
+  vpc_id      = "${module.networking.vpc_id}"
+
+  # mysql_endpoint = "https://dynamodb.${var.region}.amazonaws.com"
+  region = "${var.region}"
+
+  public_subnet_ids  = ["${module.networking.public_subnets_id}"]
+  private_subnet_ids = ["${module.networking.private_subnets_id}"]
+
+  # security_group_ids = ["${module.networking.default_sg_id}"]
+
+  security_group_ids = [
+    "${module.networking.security_groups_ids}",
+    "${module.rds.db_access_sg_id}",
+  ]
+  mysql_endpoint = "${module.rds.rds_address}"
+
   # database_name       = "${var.production_database_name}"
   # database_username   = "${var.production_database_username}"
   # database_password   = "${var.production_database_password}"

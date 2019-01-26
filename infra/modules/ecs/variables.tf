@@ -1,17 +1,17 @@
 variable "vpc_id" {
-    description = "The VPC ID"
+  description = "The VPC ID"
 }
 
 variable "environment" {
-    description = "The environment"
+  description = "The environment"
 }
 
 variable "region" {
-    description = "The AWS region"
+  description = "The AWS region"
 }
 
 variable "mysql_endpoint" {
-    description = "The mysql endpoint"
+  description = "The mysql endpoint"
 }
 
 # variable "role_arn" {
@@ -19,24 +19,16 @@ variable "mysql_endpoint" {
 # }
 
 variable "public_subnet_ids" {
-    type = "list"
-    description = "The public subnet IDs"
+  type        = "list"
+  description = "The public subnet IDs"
 }
 
 variable "private_subnet_ids" {
-    type = "list"
-    description = "The private subnet IDs"
+  type        = "list"
+  description = "The private subnet IDs"
 }
 
 variable "security_group_ids" {
-    type = "list"
-    description = "The security group collection"
+  type        = "list"
+  description = "The security group collection"
 }
-
-# variable "new_relic_app_key" {
-#     description = "The New Relic application key"
-# }
-
-# variable "new_relic_app_name" {
-#     description = "The New Relic application name"
-# }

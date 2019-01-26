@@ -42,7 +42,7 @@ func GetEngine(authHandler func(*gin.Context), db *sqlx.DB) *gin.Engine {
 }
 
 func health(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{"status": "v0.0.1"})
+	c.JSON(http.StatusOK, gin.H{"status": "v0.0.2"})
 	return
 }
 
