@@ -21,9 +21,7 @@ variable "security_group_ids" {
 
 variable "bastion_ami" {
   default = {
-    "us-east-1" = "ami-f652979b"
-    "us-east-2" = "ami-fcc19b99"
-    "us-west-1" = "ami-16efb076"
+    "us-east-1" = "ami-0ac019f4fcb7cb7e6"
   }
 }
 
