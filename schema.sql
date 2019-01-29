@@ -22,3 +22,5 @@ CREATE TABLE IF NOT EXISTS `credentials` (
   -- FOREIGN KEY (`user_id`) REFERENCES users(`user_id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+
+

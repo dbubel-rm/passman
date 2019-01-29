@@ -32,7 +32,7 @@ func resetDB(reset bool) *sqlx.DB {
 		cmd.Output()
 	}
 
-	db, err := sqlx.Connect("mysql", "root:@/passman")
+	db, err := sqlx.Connect("mysql", "root:my-secret-pw@/passman")
 	if err != nil {
 		log.Fatalln(err)
 	}

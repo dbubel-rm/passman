@@ -29,5 +29,5 @@ variable "bastion_ami" {
 
 variable "public_subnet_ids" {
   type        = "list"
-  description = "asdf"
+  description = "public subnet ids"
 }
