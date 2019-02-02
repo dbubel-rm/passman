@@ -4,8 +4,9 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/dbubel/passman/internal/platform/web"
 	"github.com/julienschmidt/httprouter"
+
+	"github.com/dbubel/passman/internal/platform/web"
 )
 
 // RequestLogger writes some information about the request to the logs in
@@ -17,11 +18,7 @@ func RequestLogger(before web.Handler) web.Handler {
 
 		err := before(log, w, r, params)
 
-		log.Printf("%s : (%d) : %s %s -> %s (%s)",
-
-			r.Method, r.URL.Path,
-		)
-
+		log.Printf("%s -> %d -> %s -> %s", r.Method, r.ContentLength, r.URL.Path, r.RemoteAddr)
 		// For consistency return the error we received.
 		return err
 	}

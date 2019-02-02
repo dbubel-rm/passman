@@ -30,7 +30,6 @@ var build = "develop"
 
 func main() {
 	log := log.New(os.Stdout, "PASSMAN : ", log.LstdFlags|log.Lmicroseconds|log.Lshortfile)
-	//outer := httprouter.New()
 
 	var cfg struct {
 		Web struct {
@@ -44,9 +43,6 @@ func main() {
 	if err := envconfig.Process("SALES", &cfg); err != nil {
 		log.Fatalf("main : Parsing Config : %v", err)
 	}
-
-	// router.GET("/", Hello)
-	// router.GET("/hello/:name", Hello)
 
 	api := http.Server{
 		Addr:           cfg.Web.APIHost,
