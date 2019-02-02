@@ -5,14 +5,11 @@ import (
 	"fmt"
 	"io"
 
-	validator "gopkg.in/go-playground/validator.v8"
+	validator "github.com/go-playground/validator"
 )
 
 // validate provides a validator for checking models.
-var validate = validator.New(&validator.Config{
-	TagName:      "validate",
-	FieldNameTag: "json",
-})
+var validate = validator.New()
 
 // Invalid describes a validation error belonging to a specific field.
 type Invalid struct {
@@ -42,7 +39,7 @@ func Unmarshal(r io.Reader, v interface{}) error {
 	var inv InvalidError
 	if fve := validate.Struct(v); fve != nil {
 		for _, fe := range fve.(validator.ValidationErrors) {
-			inv = append(inv, Invalid{Fld: fe.Field, Err: fe.Tag})
+			inv = append(inv, Invalid{Fld: fe.Field(), Err: fe.Tag()})
 		}
 		return inv
 	}

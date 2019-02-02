@@ -84,6 +84,8 @@ func RespondError(log *log.Logger, w http.ResponseWriter, err error, code int) {
 func Respond(log *log.Logger, w http.ResponseWriter, data interface{}, code int) {
 
 	// Set the status code for the request logger middleware.
+	// v := ctx.Value(KeyValues).(*Values)
+	// v.StatusCode = code
 
 	// Just set the status code and we are done. If there is nothing to marshal
 	// set status code and return.
@@ -95,7 +97,7 @@ func Respond(log *log.Logger, w http.ResponseWriter, data interface{}, code int)
 	// Marshal the data into a JSON string.
 	jsonData, err := json.MarshalIndent(data, "", "  ")
 	if err != nil {
-		log.Printf("%s : Respond %v Marshalling JSON response\n", err)
+		log.Printf("%s : Respond Marshalling JSON response\n", err)
 
 		// Should respond with internal server error.
 		RespondError(log, w, err, http.StatusInternalServerError)

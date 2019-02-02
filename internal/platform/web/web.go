@@ -3,6 +3,7 @@ package web
 import (
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/julienschmidt/httprouter"
 )
@@ -14,13 +15,12 @@ type ctxKey int
 const KeyValues ctxKey = 1
 
 // Values represent state for each request.
-
-// type Values struct {
-// 	TraceID    string
-// 	Now        time.Time
-// 	StatusCode int
-// 	Error      bool
-// }
+type Values struct {
+	TraceID    string
+	Now        time.Time
+	StatusCode int
+	Error      bool
+}
 
 // A Handler is a type that handles an http request within our own little mini
 // framework.
@@ -30,9 +30,9 @@ type Handler func(log *log.Logger, w http.ResponseWriter, r *http.Request, param
 // object for each of our http handlers. Feel free to add any configuration
 // data/logic on this App struct
 type App struct {
-	Router *httprouter.Router
-	log    *log.Logger
-	mw     []Middleware
+	*httprouter.Router
+	log *log.Logger
+	mw  []Middleware
 }
 
 // New creates an App value that handle a set of routes for the application.
@@ -55,38 +55,10 @@ func (a *App) Handle(verb, path string, handler Handler, mw ...Middleware) {
 	// The function to execute for each request.
 	h := func(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
 
-		// This API is using pointer semantic methods on this empty
-		// struct type :( This is causing the need to declare this
-		// variable here at the top.
-		// var hf tracecontext.HTTPFormat
-
-		// Check the request for an existing Trace. The WithSpanContext
-		// function can unmarshal any existing context or create a new one.
-		// var ctx context.Context
-		// var span *trace.Span
-		// if sc, ok := hf.SpanContextFromRequest(r); ok {
-		// 	ctx, span = trace.StartSpanWithRemoteParent(r.Context(), "internal.platform.web", sc)
-		// } else {
-		// 	ctx, span = trace.StartSpan(r.Context(), "internal.platform.web")
-		// }
-
-		// Set the context with the required values to
-		// process the request.
-		// v := Values{
-		// 	TraceID: span.SpanContext().TraceID.String(),
-		// 	Now:     time.Now(),
-		// }
-		// ctx = context.WithValue(ctx, KeyValues, &v)
-
-		// // Set the parent span on the outgoing requests before any other header to
-		// // ensure that the trace is ALWAYS added to the request regardless of
-		// // any error occuring or not.
-		// hf.SpanContextToRequest(span.SpanContext(), r)
-
-		// // Call the wrapped handler functions.
-		// if err := handler(ctx, a.log, w, r, params); err != nil {
-		// 	Error(ctx, a.log, w, err)
-		// }
+		// Call the wrapped handler functions.
+		if err := handler(a.log, w, r, params); err != nil {
+			// Error(ctx, a.log, w, err)
+		}
 	}
 
 	// Add this handler for the specified verb and route.
