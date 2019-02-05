@@ -33,14 +33,8 @@ type NewUser struct {
 // we do not want to use pointers to basic types but we make exceptions around
 // marshalling/unmarshalling.
 type UpdateUser struct {
-	Name            *string  `json:"name"`
-	Email           *string  `json:"email"` // TODO(jlw) enforce uniqueness.
-	Roles           []string `json:"roles"` // TODO(jlw) Ensure only includes valid roles.
-	Password        *string  `json:"password"`
-	PasswordConfirm *string  `json:"password_confirm" validate:"omitempty,eqfield=Password"`
-}
-
-// Token is the payload we deliver to users when they authenticate.
-type Token struct {
-	Token string `json:"token"`
+	Name            *string `json:"name"`
+	Email           *string `json:"email"` // TODO(jlw) enforce uniqueness.
+	Password        *string `json:"password"`
+	PasswordConfirm *string `json:"password_confirm" validate:"omitempty,eqfield=Password"`
 }
