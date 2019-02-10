@@ -9,6 +9,13 @@ github.com/gin-gonic/gin
 github.com/gin-gonic/gin/binding
 github.com/gin-gonic/gin/json
 github.com/gin-gonic/gin/render
+# github.com/go-playground/locales v0.12.1
+github.com/go-playground/locales
+github.com/go-playground/locales/currency
+# github.com/go-playground/universal-translator v0.16.0
+github.com/go-playground/universal-translator
+# github.com/go-playground/validator v9.26.0+incompatible
+github.com/go-playground/validator
 # github.com/go-sql-driver/mysql v1.4.1
 github.com/go-sql-driver/mysql
 # github.com/golang/protobuf v1.2.0
@@ -22,6 +29,8 @@ github.com/json-iterator/go
 github.com/julienschmidt/httprouter
 # github.com/kelseyhightower/envconfig v1.3.0
 github.com/kelseyhightower/envconfig
+# github.com/leodido/go-urn v1.1.0
+github.com/leodido/go-urn
 # github.com/mattn/go-isatty v0.0.4
 github.com/mattn/go-isatty
 # github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd

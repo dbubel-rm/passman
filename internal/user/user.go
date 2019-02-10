@@ -1,11 +1,8 @@
 package user
 
 import (
-	"time"
-
+	"github.com/jmoiron/sqlx"
 	"github.com/pkg/errors"
-
-	"golang.org/x/crypto/bcrypt"
 )
 
 const usersCollection = "users"
@@ -73,26 +70,26 @@ var (
 // }
 
 // Create inserts a new user into the database.
-func Create(nu *NewUser, now time.Time) (*User, error) {
+func Create(db *sqlx.DB, nu *NewUser) (*NewUser, error) {
 
 	// Mongo truncates times to milliseconds when storing. We and do the same
 	// here so the value we return is consistent with what we store.
-	now = now.Truncate(time.Millisecond)
+	// now = now.Truncate(time.Millisecond)
 
-	pw, err := bcrypt.GenerateFromPassword([]byte(nu.Password), bcrypt.DefaultCost)
-	if err != nil {
-		return nil, errors.Wrap(err, "generating password hash")
-	}
+	// pw, err := bcrypt.GenerateFromPassword([]byte(nu.Password), bcrypt.DefaultCost)
+	// if err != nil {
+	// 	return nil, errors.Wrap(err, "generating password hash")
+	// }
 
-	u := User{
-		// ID:           bson.NewObjectId(),
-		Name:         nu.Name,
-		Email:        nu.Email,
-		PasswordHash: pw,
-		Roles:        nu.Roles,
-		DateCreated:  now,
-		DateModified: now,
-	}
+	// u := User{
+	// 	// ID:           bson.NewObjectId(),
+	// 	Name:  nu.Name,
+	// 	Email: nu.Email,
+	// 	// PasswordHash: pw,
+	// 	// Roles:        nu.Roles,
+	// 	// DateCreated:  now,
+	// 	// DateModified: now,
+	// }
 
 	// f := func(collection *mgo.Collection) error {
 
@@ -102,7 +99,8 @@ func Create(nu *NewUser, now time.Time) (*User, error) {
 	// 	return nil, errors.Wrap(err, fmt.Sprintf("db.users.insert(%s)", db.Query(&u)))
 	// }
 
-	return &u, nil
+	n := NewUser{}
+	return &n, nil
 }
 
 // // Update replaces a user document in the database.

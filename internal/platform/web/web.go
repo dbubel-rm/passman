@@ -57,7 +57,7 @@ func (a *App) Handle(verb, path string, handler Handler, mw ...Middleware) {
 
 		// Call the wrapped handler functions.
 		if err := handler(a.log, w, r, params); err != nil {
-			// Error(ctx, a.log, w, err)
+			Error(a.log, w, err)
 		}
 	}
 

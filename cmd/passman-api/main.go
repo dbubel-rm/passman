@@ -30,7 +30,7 @@ func main() {
 			ShutdownTimeout time.Duration `default:"5s" envconfig:"SHUTDOWN_TIMEOUT"`
 		}
 		DB struct {
-			Host string `default:"root:@tcp(127.0.0.1:3306)/passman" envconfig:"DB_HOST"`
+			Host string `default:"root@tcp(127.0.0.1:3306)/passman" envconfig:"DB_HOST"`
 		}
 	}
 
@@ -45,6 +45,8 @@ func main() {
 	masterDB, err := db.New(cfg.DB.Host)
 	if err != nil {
 		log.Fatalf("main : Register DB : %v", err)
+	} else {
+		log.Println("DB connect OK")
 	}
 	defer masterDB.Close()
 

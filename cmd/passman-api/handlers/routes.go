@@ -19,5 +19,11 @@ func API(log *log.Logger, db *db.DB) http.Handler {
 	}
 	app.Handle("GET", "/v1/health", check.Health)
 
+	users := User{
+		MasterDB: db.Database,
+	}
+
+	app.Handle("POST", "/v1/users", users.Create, mid.AuthHandler)
+
 	return app
 }
