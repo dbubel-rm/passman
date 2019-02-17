@@ -1,11 +1,8 @@
 package user
 
-import (
-	"github.com/jmoiron/sqlx"
-	"github.com/pkg/errors"
-)
+import "errors"
 
-const usersCollection = "users"
+// const usersCollection = "users"
 
 var (
 	// ErrNotFound abstracts the mgo not found error.
@@ -70,38 +67,38 @@ var (
 // }
 
 // Create inserts a new user into the database.
-func Create(db *sqlx.DB, nu *NewUser) (*NewUser, error) {
+// func Create(db *sqlx.DB, nu *NewUser) (*NewUser, error) {
 
-	// Mongo truncates times to milliseconds when storing. We and do the same
-	// here so the value we return is consistent with what we store.
-	// now = now.Truncate(time.Millisecond)
+// Mongo truncates times to milliseconds when storing. We and do the same
+// here so the value we return is consistent with what we store.
+// now = now.Truncate(time.Millisecond)
 
-	// pw, err := bcrypt.GenerateFromPassword([]byte(nu.Password), bcrypt.DefaultCost)
-	// if err != nil {
-	// 	return nil, errors.Wrap(err, "generating password hash")
-	// }
+// pw, err := bcrypt.GenerateFromPassword([]byte(nu.Password), bcrypt.DefaultCost)
+// if err != nil {
+// 	return nil, errors.Wrap(err, "generating password hash")
+// }
 
-	// u := User{
-	// 	// ID:           bson.NewObjectId(),
-	// 	Name:  nu.Name,
-	// 	Email: nu.Email,
-	// 	// PasswordHash: pw,
-	// 	// Roles:        nu.Roles,
-	// 	// DateCreated:  now,
-	// 	// DateModified: now,
-	// }
+// u := User{
+// 	// ID:           bson.NewObjectId(),
+// 	Name:  nu.Name,
+// 	Email: nu.Email,
+// 	// PasswordHash: pw,
+// 	// Roles:        nu.Roles,
+// 	// DateCreated:  now,
+// 	// DateModified: now,
+// }
 
-	// f := func(collection *mgo.Collection) error {
+// f := func(collection *mgo.Collection) error {
 
-	// 	return collection.Insert(&u)
-	// }
-	// if err := dbConn.Execute(ctx, usersCollection, f); err != nil {
-	// 	return nil, errors.Wrap(err, fmt.Sprintf("db.users.insert(%s)", db.Query(&u)))
-	// }
+// 	return collection.Insert(&u)
+// }
+// if err := dbConn.Execute(ctx, usersCollection, f); err != nil {
+// 	return nil, errors.Wrap(err, fmt.Sprintf("db.users.insert(%s)", db.Query(&u)))
+// }
 
-	n := NewUser{}
-	return &n, nil
-}
+// 	n := NewUser{}
+// 	return &n, nil
+// }
 
 // // Update replaces a user document in the database.
 // func Update(ctx context.Context, dbConn *db.DB, id string, upd *UpdateUser, now time.Time) error {

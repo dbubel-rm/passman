@@ -1,6 +1,7 @@
 package tests
 
 import (
+	"encoding/json"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -20,7 +21,7 @@ const (
 	Failed  = "\u2717"
 )
 
-var d *db.DB
+var d *db.MySQLDB
 var l *log.Logger
 
 func init() {
@@ -32,7 +33,8 @@ func init() {
 	}
 	log.Printf("\t%s DB connection OK", Success)
 }
-func TestUsersCreate(t *testing.T) {
+
+func TestUsers(t *testing.T) {
 
 	a = handlers.API(l, d).(*web.App)
 	r := httptest.NewRequest("POST", "/v1/users", strings.NewReader("{}"))
@@ -41,7 +43,38 @@ func TestUsersCreate(t *testing.T) {
 	a.ServeHTTP(w, r)
 
 	if w.Code != http.StatusBadRequest {
-		t.Fatalf("\t%s Should receive a status code of 400 for the response. Received: %d", Failed, w.Code)
+		t.Fatalf("\t%s Should receive a status code of 400. Received: %d", Failed, w.Code)
 	}
 	t.Logf("\t%s Should receive a status code of 400 for the response.", Success)
+
+	a = handlers.API(l, d).(*web.App)
+	r = httptest.NewRequest("POST", "/v1/users", strings.NewReader(`{"email":"dean@dean.com","password":"test123","returnSecureToken":true}`))
+	w = httptest.NewRecorder()
+
+	a.ServeHTTP(w, r)
+
+	if w.Code != http.StatusOK {
+		t.Fatalf("\t%s Should receive a status code of 200 for the response. Received: %d", Failed, w.Code)
+	}
+	t.Logf("\t%s Should receive a status code of 200.", Success)
+
+	type response struct {
+		IdToken string `json:"idToken"`
+	}
+	var s response
+
+	json.NewDecoder(w.Body).Decode(&s)
+
+	del, _ := json.Marshal(&s)
+
+	a = handlers.API(l, d).(*web.App)
+	r = httptest.NewRequest("DELETE", "/v1/users", strings.NewReader(string(del)))
+	w = httptest.NewRecorder()
+
+	a.ServeHTTP(w, r)
+
+	if w.Code != http.StatusOK {
+		t.Fatalf("\t%s Should receive a status code of 200 for the response. Received: %d", Failed, w.Code)
+	}
+	t.Logf("\t%s Should receive a status code of 200.", Success)
 }

@@ -58,10 +58,10 @@ func AddCredentialDB(db *sqlx.DB) gin.HandlerFunc {
 		u, _ := c.Get("localID") // should rename to local id
 
 		if a {
-			q := fmt.Sprintf(`INSERT INTO credentials 
+
+			_, err := db.Exec(`INSERT INTO credentials 
 			(local_id, service_name, username, password) 
-			values ("%s", :service_name, :username,:password)`, u)
-			_, err := db.NamedExec(q, credentials)
+			values ("%s", :service_name, :username,:password)`, credentials)
 
 			if err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})

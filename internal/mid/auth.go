@@ -87,6 +87,7 @@ func AuthHandler(before web.Handler) web.Handler {
 			// 	"description": "Error validating jwt",
 			// })
 			// return
+			return errors.New("no valid token found")
 		}
 
 		iss, ok := tok.Claims.(jwt.MapClaims)["iss"].(string)
@@ -104,7 +105,12 @@ func AuthHandler(before web.Handler) web.Handler {
 			// return
 		}
 
-		ctx := context.WithValue(r.Context(), "Username", "HI")
+		localId, ok := tok.Claims.(jwt.MapClaims)["localId"].(string)
+		if !ok {
+			return errors.New("no localId")
+		}
+
+		ctx := context.WithValue(r.Context(), "localId", localId)
 		err = before(log, w, r.WithContext(ctx), params)
 		// log.Printf("%s -> %d -> %s -> %s", r.Method, r.ContentLength, r.URL.Path, r.RemoteAddr)
 		// For consistency return the error we received.

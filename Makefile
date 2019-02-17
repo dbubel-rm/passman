@@ -6,6 +6,7 @@ build:
 		--build-arg BUILD_DATE=`date -u +”%Y-%m-%dT%H:%M:%SZ”` \
 		.
 	docker system prune -f
+	
 test:
 	docker-compose -f docker-compose.yaml up --build --abort-on-container-exit 
 

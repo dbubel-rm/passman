@@ -37,9 +37,9 @@ type FirebaseStruct struct {
 
 var baseUrl = "http://passman-server-alb-804849544.us-east-1.elb.amazonaws.com"
 
-var urlCreateAccount = baseUrl + "/public/user"
-var urlDeleteUser = baseUrl + "/user"
-var urlAuthUser = baseUrl + "/public/authUser"
+var urlCreateAccount = baseUrl + "/v1/users"
+var urlDeleteUser = baseUrl + "/v1/users"
+var urlAuthUser = baseUrl + "/v1/getToken"
 var urlNewCredential = baseUrl + "/credential"
 var passmanHome = "~/.passman/session.json"
 
