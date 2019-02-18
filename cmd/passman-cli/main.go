@@ -35,12 +35,12 @@ type FirebaseStruct struct {
 	PassmanPayload string `json:"passmanPayload"`
 }
 
-var baseUrl = "http://passman-server-alb-804849544.us-east-1.elb.amazonaws.com"
+var baseUrl = "http://localhost:3000"
 
 var urlCreateAccount = baseUrl + "/v1/users"
 var urlDeleteUser = baseUrl + "/v1/users"
-var urlAuthUser = baseUrl + "/v1/getToken"
-var urlNewCredential = baseUrl + "/credential"
+var urlAuthUser = baseUrl + "/v1/signin"
+var urlNewCredential = baseUrl + "/v1/credential"
 var passmanHome = "~/.passman/session.json"
 
 var argsWithoutProg = os.Args[1:]
@@ -170,9 +170,10 @@ func getToken() {
 	username := argsWithoutProg[1]
 	password := os.Getenv(PASSMAN_MASTER)
 
-	var payload = `{"email":"%s","password":"%s",returnSecureToken: true}`
+	var payload = `{"email":"%s","password":"%s","returnSecureToken": true}`
 	payload = fmt.Sprintf(payload, username, password)
-	req, err := http.NewRequest("POST", urlAuthUser, strings.NewReader(payload))
+	fmt.Println(payload)
+	req, err := http.NewRequest("GET", urlAuthUser, strings.NewReader(payload))
 
 	if err != nil {
 		log.Println(err.Error())
@@ -262,13 +263,18 @@ func deleteAccount() {
 		return
 	}
 
-	req, err := http.NewRequest("DELETE", urlDeleteUser, nil)
+	var payload = `{"idToken":"%s"}`
+	payload = fmt.Sprintf(payload, storedJWT.IDToken)
+
+	// req, err := http.NewRequest("GET", urlAuthUser, strings.NewReader(payload))
+	// fmt.Println(payload)
+	req, err := http.NewRequest("DELETE", urlDeleteUser, strings.NewReader(payload))
 
 	if err != nil {
 		log.Println(err.Error())
 	}
 
-	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", storedJWT.IDToken))
+	// req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", storedJWT.IDToken))
 	res, err := http.DefaultClient.Do(req)
 
 	if err != nil {
@@ -282,7 +288,7 @@ func deleteAccount() {
 }
 
 func createAccount() {
-	payloadCreateAccount := `{"email": "%s","password": "%s",returnSecureToken: true}`
+	payloadCreateAccount := `{"email": "%s","password": "%s","returnSecureToken": true}`
 
 	username := argsWithoutProg[1]
 	password := os.Getenv(PASSMAN_MASTER)

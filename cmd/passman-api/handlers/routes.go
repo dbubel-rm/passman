@@ -34,7 +34,8 @@ func API(log *log.Logger, db *db.MySQLDB) http.Handler {
 		MasterDB: db.Database,
 	}
 
-	app.Handle("POST", "/v1/credential", creds.Add)
+	app.Handle("POST", "/v1/credential", creds.Add, mid.AuthHandler)
+	app.Handle("GET", "/v1/credential/:serviceName", creds.Get, mid.AuthHandler)
 
 	return app
 }

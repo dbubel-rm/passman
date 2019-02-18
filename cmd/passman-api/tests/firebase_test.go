@@ -36,6 +36,7 @@ func init() {
 
 func TestUsers(t *testing.T) {
 
+	// Test bad request
 	a = handlers.API(l, d).(*web.App)
 	r := httptest.NewRequest("POST", "/v1/users", strings.NewReader("{}"))
 	w := httptest.NewRecorder()
@@ -45,8 +46,9 @@ func TestUsers(t *testing.T) {
 	if w.Code != http.StatusBadRequest {
 		t.Fatalf("\t%s Should receive a status code of 400. Received: %d", Failed, w.Code)
 	}
-	t.Logf("\t%s Should receive a status code of 400 for the response.", Success)
+	t.Logf("\t%s Should receive a status code of 400.", Success)
 
+	// Test create
 	a = handlers.API(l, d).(*web.App)
 	r = httptest.NewRequest("POST", "/v1/users", strings.NewReader(`{"email":"dean@dean.com","password":"test123","returnSecureToken":true}`))
 	w = httptest.NewRecorder()
@@ -58,6 +60,19 @@ func TestUsers(t *testing.T) {
 	}
 	t.Logf("\t%s Should receive a status code of 200.", Success)
 
+	// Test signin
+	a = handlers.API(l, d).(*web.App)
+	r = httptest.NewRequest("GET", "/v1/signin", strings.NewReader(`{"email":"dean@dean.com","password":"test123","returnSecureToken":true}`))
+	w = httptest.NewRecorder()
+
+	a.ServeHTTP(w, r)
+
+	if w.Code != http.StatusOK {
+		t.Fatalf("\t%s Should receive a status code of 200 for the response. Received: %d", Failed, w.Code)
+	}
+	t.Logf("\t%s Should receive a status code of 200.", Success)
+
+	// Test delete
 	type response struct {
 		IdToken string `json:"idToken"`
 	}

@@ -7,8 +7,9 @@ type Signin struct {
 }
 
 type Create struct {
-	Email    string `json:"email" validate:"required"`
-	Password string `json:"password" validate:"required"`
+	Email             string `json:"email" validate:"required"`
+	Password          string `json:"password" validate:"required"`
+	ReturnSecureToken bool   `json:"returnSecureToken" validate:"required"`
 }
 
 type Delete struct {

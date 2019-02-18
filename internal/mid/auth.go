@@ -5,7 +5,6 @@ import (
 	"crypto/rsa"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -29,28 +28,26 @@ var publicPEM map[string]string
 func AuthHandler(before web.Handler) web.Handler {
 	// Wrap this handler around the next one provided.
 	return func(log *log.Logger, w http.ResponseWriter, r *http.Request, params httprouter.Params) error {
-		fmt.Println("AUTH")
+
 		var respBody []byte
 		resp, err := http.Get(PUBLIC_KEY_URL)
 
 		if err != nil {
-			log.Println(err.Error())
+			return err
 		}
 
 		defer resp.Body.Close()
 
-		respBody, _ = ioutil.ReadAll(resp.Body)
+		respBody, err = ioutil.ReadAll(resp.Body)
 
 		if err != nil {
-			log.Println(err.Error())
+			return err
 		}
 
 		err = json.Unmarshal(respBody, &publicPEM)
 		if err != nil {
-			log.Println(err.Error())
+			return err
 		}
-
-		log.Println(respBody)
 
 		var publicKey *rsa.PublicKey
 		var tok *jwt.Token
@@ -58,9 +55,7 @@ func AuthHandler(before web.Handler) web.Handler {
 
 		token := strings.Split(r.Header.Get("Authorization"), "Bearer ")
 
-		if len(token) != 2 {
-			// c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid auth header"})
-			// c.Abort()
+		if len(token) < 2 {
 			return errors.New("no token")
 		}
 
@@ -81,39 +76,26 @@ func AuthHandler(before web.Handler) web.Handler {
 
 		// No valid jwt was found
 		if err != nil {
-			// c.Abort()
-			// c.JSON(http.StatusInternalServerError, gin.H{
-			// 	"error":       err.Error(),
-			// 	"description": "Error validating jwt",
-			// })
-			// return
 			return errors.New("no valid token found")
 		}
 
 		iss, ok := tok.Claims.(jwt.MapClaims)["iss"].(string)
 		if iss != JWT_ISSUER || !ok {
-			// c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid ISS"})
-			// c.Abort()
-			// return
+			return errors.New("Invalid ISS")
 		}
-		log.Println("AUth OK")
 
 		aud, ok := tok.Claims.(jwt.MapClaims)["aud"].(string)
 		if aud != JWT_AUD || !ok {
-			// c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid AUD"})
-			// c.Abort()
-			// return
+			return errors.New("Invalid AUD")
 		}
 
-		localId, ok := tok.Claims.(jwt.MapClaims)["localId"].(string)
+		localId, ok := tok.Claims.(jwt.MapClaims)["user_id"].(string)
 		if !ok {
 			return errors.New("no localId")
 		}
 
 		ctx := context.WithValue(r.Context(), "localId", localId)
 		err = before(log, w, r.WithContext(ctx), params)
-		// log.Printf("%s -> %d -> %s -> %s", r.Method, r.ContentLength, r.URL.Path, r.RemoteAddr)
-		// For consistency return the error we received.
 		return err
 	}
 }

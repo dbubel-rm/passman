@@ -83,12 +83,6 @@ func RespondError(log *log.Logger, w http.ResponseWriter, err error, code int) {
 // If code is StatusNoContent, v is expected to be nil.
 func Respond(log *log.Logger, w http.ResponseWriter, data interface{}, code int) {
 
-	// Set the status code for the request logger middleware.
-	// v := ctx.Value(KeyValues).(*Values)
-	// v.StatusCode = code
-
-	// Just set the status code and we are done. If there is nothing to marshal
-	// set status code and return.
 	if code == http.StatusNoContent || data == nil {
 		w.WriteHeader(code)
 		return
