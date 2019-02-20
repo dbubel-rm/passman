@@ -15,19 +15,33 @@ type Credentials struct {
 	MasterDB *sqlx.DB
 }
 
-func (c *Credentials) Add(log *log.Logger, w http.ResponseWriter, r *http.Request, params httprouter.Params) error {
+func (c *Credentials) add(log *log.Logger, w http.ResponseWriter, r *http.Request, params httprouter.Params) error {
 	var newU credentials.Add
 	if err := web.Unmarshal(r.Body, &newU); err != nil {
 		return errors.Cause(err)
 	}
-	return credentials.AddCredentialDB(c.MasterDB, &newU, r.Context().Value("localId"))
+	err := credentials.AddCredentialDB(c.MasterDB, &newU, r.Context().Value("localId"))
+	if err != nil {
+		web.RespondError(log, w, err, http.StatusInternalServerError)
+	}
+	web.Respond(log, w, nil, http.StatusOK)
+	return nil
 }
 
-func (c *Credentials) Get(log *log.Logger, w http.ResponseWriter, r *http.Request, params httprouter.Params) error {
+func (c *Credentials) get(log *log.Logger, w http.ResponseWriter, r *http.Request, params httprouter.Params) error {
 	cred, err := credentials.GetCredentialDB(c.MasterDB, params.ByName("serviceName"), r.Context().Value("localId"))
 	if err != nil {
 		web.RespondError(log, w, err, http.StatusInternalServerError)
 	}
 	web.Respond(log, w, cred, http.StatusOK)
+	return nil
+}
+
+func (c *Credentials) delete(log *log.Logger, w http.ResponseWriter, r *http.Request, params httprouter.Params) error {
+	err := credentials.DeleteCredentialDB(c.MasterDB, params.ByName("serviceName"), r.Context().Value("localId"))
+	if err != nil {
+		web.RespondError(log, w, err, http.StatusInternalServerError)
+	}
+	web.Respond(log, w, nil, http.StatusOK)
 	return nil
 }

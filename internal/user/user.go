@@ -1,23 +1,21 @@
 package user
 
-import "errors"
-
 // const usersCollection = "users"
 
-var (
-	// ErrNotFound abstracts the mgo not found error.
-	ErrNotFound = errors.New("Entity not found")
+// var (
+// 	// ErrNotFound abstracts the mgo not found error.
+// 	ErrNotFound = errors.New("Entity not found")
 
-	// ErrInvalidID occurs when an ID is not in a valid form.
-	ErrInvalidID = errors.New("ID is not in its proper form")
+// 	// ErrInvalidID occurs when an ID is not in a valid form.
+// 	ErrInvalidID = errors.New("ID is not in its proper form")
 
-	// ErrAuthenticationFailure occurs when a user attempts to authenticate but
-	// anything goes wrong.
-	ErrAuthenticationFailure = errors.New("Authentication failed")
+// 	// ErrAuthenticationFailure occurs when a user attempts to authenticate but
+// 	// anything goes wrong.
+// 	ErrAuthenticationFailure = errors.New("Authentication failed")
 
-	// ErrForbidden occurs when a user tries to do something that is forbidden to them according to our access control policies.
-	ErrForbidden = errors.New("Attempted action is not allowed")
-)
+// 	// ErrForbidden occurs when a user tries to do something that is forbidden to them according to our access control policies.
+// 	ErrForbidden = errors.New("Attempted action is not allowed")
+// )
 
 // // List retrieves a list of existing users from the database.
 // func List(ctx context.Context, dbConn *db.DB) ([]User, error) {

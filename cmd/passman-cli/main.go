@@ -121,16 +121,17 @@ func main() {
 	log.SetFlags(log.Lshortfile)
 
 	actions := make(map[string]func())
-	actions[CREATE_ACCOUNT] = createAccount
-	actions[DELETE_ACCOUNT] = deleteAccount
 	actions[HELP] = displayOptions
 	actions[VERSION] = version
 	actions[GEN_PASS] = genPassword
+	// API calls
+	actions[LOGIN] = signin
+	actions[CREATE_ACCOUNT] = createAccount
+	actions[DELETE_ACCOUNT] = deleteAccount
 	actions[ADD_CRED] = addCredential
-	actions[LOGIN] = getToken
 	actions[GET_CRED] = getCredential
-	actions[GET_CREDS] = getCredentials
 	actions[DELETE_CRED] = deleteCredential
+	// actions[GET_CREDS] = getCredentials
 
 	if len(argsWithoutProg) == 0 {
 		log.Println("No action specified")
@@ -162,7 +163,7 @@ func getUsernameAndPassword() (string, string) {
 	return text, password
 }
 
-func getToken() {
+func signin() {
 	if len(argsWithoutProg) < 2 {
 		log.Println("No account email specified")
 		return
@@ -374,6 +375,7 @@ func addCredential() {
 	}
 
 	password = encrypt([]byte(password), os.Getenv(PASSMAN_MASTER))
+	username = encrypt([]byte(username), os.Getenv(PASSMAN_MASTER))
 	serviceName = argsWithoutProg[1]
 	newCredentialPayload = fmt.Sprintf(newCredentialPayload, serviceName, username, password)
 	req, err := http.NewRequest("POST", urlNewCredential, strings.NewReader(newCredentialPayload))
@@ -472,6 +474,7 @@ func getCredential() {
 	}
 
 	sDec, err := b64.StdEncoding.DecodeString(credentialRecord.Password)
+	uName, _ := b64.StdEncoding.DecodeString(credentialRecord.Username)
 
 	if err != nil {
 		log.Println(err.Error())
@@ -479,78 +482,79 @@ func getCredential() {
 	}
 
 	credentialRecord.Password = string(decrypt([]byte(sDec), os.Getenv(PASSMAN_MASTER)))
+	credentialRecord.Username = string(decrypt([]byte(uName), os.Getenv(PASSMAN_MASTER)))
 	log.Println("Credential retreived OK:", credentialRecord)
 }
 
-func getCredentials() {
-	tokenData, err := getUserStore()
+// func getCredentials() {
+// 	tokenData, err := getUserStore()
 
-	if err != nil {
-		log.Println(err.Error())
-		return
-	}
+// 	if err != nil {
+// 		log.Println(err.Error())
+// 		return
+// 	}
 
-	var storedJWT FirebaseStruct
-	err = json.Unmarshal(tokenData, &storedJWT)
+// 	var storedJWT FirebaseStruct
+// 	err = json.Unmarshal(tokenData, &storedJWT)
 
-	if err != nil {
-		log.Println(err.Error())
-	}
+// 	if err != nil {
+// 		log.Println(err.Error())
+// 	}
 
-	req, err := http.NewRequest("GET", urlNewCredential+"s", nil)
-	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", storedJWT.IDToken))
+// 	req, err := http.NewRequest("GET", urlNewCredential+"s", nil)
+// 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", storedJWT.IDToken))
 
-	if err != nil {
-		log.Println(err.Error())
-		return
-	}
+// 	if err != nil {
+// 		log.Println(err.Error())
+// 		return
+// 	}
 
-	res, err := http.DefaultClient.Do(req)
+// 	res, err := http.DefaultClient.Do(req)
 
-	if err != nil {
-		log.Println(err.Error())
-		return
-	}
+// 	if err != nil {
+// 		log.Println(err.Error())
+// 		return
+// 	}
 
-	body, _ := ioutil.ReadAll(res.Body)
+// 	body, _ := ioutil.ReadAll(res.Body)
 
-	if err != nil {
-		log.Println(err.Error())
-	}
+// 	if err != nil {
+// 		log.Println(err.Error())
+// 	}
 
-	defer res.Body.Close()
+// 	defer res.Body.Close()
 
-	if res.StatusCode != 200 {
-		log.Println(string(body))
-		return
-	}
+// 	if res.StatusCode != 200 {
+// 		log.Println(string(body))
+// 		return
+// 	}
 
-	var credentialRecord = []struct {
-		ServiceName string
-		Username    string
-		Password    string
-	}{}
+// 	var credentialRecord = []struct {
+// 		ServiceName string
+// 		Username    string
+// 		Password    string
+// 	}{}
 
-	err = json.Unmarshal(body, &credentialRecord)
+// 	err = json.Unmarshal(body, &credentialRecord)
 
-	if err != nil {
-		log.Println(err.Error())
-		return
-	}
+// 	if err != nil {
+// 		log.Println(err.Error())
+// 		return
+// 	}
 
-	for i := 0; i < len(credentialRecord); i++ {
-		sDec, err := b64.StdEncoding.DecodeString(credentialRecord[i].Password)
+// 	for i := 0; i < len(credentialRecord); i++ {
+// 		sDec, err := b64.StdEncoding.DecodeString(credentialRecord[i].Password)
 
-		if err != nil {
-			log.Println(err.Error())
-			return
-		}
+// 		if err != nil {
+// 			log.Println(err.Error())
+// 			return
+// 		}
 
-		credentialRecord[i].Password = string(decrypt([]byte(sDec), os.Getenv(PASSMAN_MASTER)))
-	}
+// 		credentialRecord[i].Password = string(decrypt([]byte(sDec), os.Getenv(PASSMAN_MASTER)))
+// 	}
 
-	log.Println("Credential retreived OK:", credentialRecord)
-}
+// 	log.Println("Credential retreived OK:", credentialRecord)
+// }
 
 func deleteCredential() {
 	if len(argsWithoutProg) < 2 {

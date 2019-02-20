@@ -21,3 +21,12 @@ func GetCredentialDB(dbConn *sqlx.DB, serviceName string, localID interface{}) (
 
 	return &jason, err
 }
+
+func DeleteCredentialDB(dbConn *sqlx.DB, serviceName string, localID interface{}) error {
+
+	_, err := dbConn.Exec(`delete from credentials 
+	where service_name = ?
+	and local_id = ?`, serviceName, localID)
+	return err
+
+}
