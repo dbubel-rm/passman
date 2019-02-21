@@ -19,6 +19,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/olekukonko/tablewriter"
 	"golang.org/x/crypto/bcrypt"
 	"golang.org/x/crypto/ssh/terminal"
 )
@@ -61,6 +62,7 @@ const (
 
 func version() {
 	fmt.Println("v0.0.1")
+
 }
 
 func generateRandomBytes(n int) ([]byte, error) {
@@ -234,7 +236,18 @@ func genPassword() {
 		fmt.Println(err.Error())
 	}
 	n, _ := GenerateRandomString(int(i))
-	fmt.Println(n)
+
+	data := [][]string{
+		[]string{n},
+	}
+
+	table := tablewriter.NewWriter(os.Stdout)
+	table.SetHeader([]string{"New Password"})
+
+	for _, v := range data {
+		table.Append(v)
+	}
+	table.Render() // Send output
 }
 
 func deleteAccount() {
@@ -483,7 +496,18 @@ func getCredential() {
 
 	credentialRecord.Password = string(decrypt([]byte(sDec), os.Getenv(PASSMAN_MASTER)))
 	credentialRecord.Username = string(decrypt([]byte(uName), os.Getenv(PASSMAN_MASTER)))
-	log.Println("Credential retreived OK:", credentialRecord)
+
+	data := [][]string{
+		[]string{credentialRecord.ServiceName, credentialRecord.Username, credentialRecord.Password},
+	}
+
+	table := tablewriter.NewWriter(os.Stdout)
+	table.SetHeader([]string{"service name", "username", "password"})
+
+	for _, v := range data {
+		table.Append(v)
+	}
+	table.Render() // Send output
 }
 
 // func getCredentials() {

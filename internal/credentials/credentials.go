@@ -30,3 +30,13 @@ func DeleteCredentialDB(dbConn *sqlx.DB, serviceName string, localID interface{}
 	return err
 
 }
+
+func UpdateCredentialDB(dbConn *sqlx.DB, serviceName, password string, localID interface{}) error {
+
+	_, err := dbConn.Exec(`update credentials 
+	set password = ?
+	where service_name = ?
+	and local_id = ?`, password, serviceName, localID)
+	return err
+
+}

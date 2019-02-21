@@ -3,7 +3,6 @@ package handlers
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 
@@ -64,7 +63,6 @@ func (f *Firebase) Create(log *log.Logger, w http.ResponseWriter, r *http.Reques
 	if err != nil {
 		return err
 	}
-	fmt.Println("OK2")
 
 	var ag interface{}
 	json.NewDecoder(res.Body).Decode(&ag)
