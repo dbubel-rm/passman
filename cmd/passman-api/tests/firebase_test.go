@@ -59,7 +59,7 @@ func init() {
 
 }
 
-func TestUsers(t *testing.T) {
+func TestUsersEmptyPayload(t *testing.T) {
 
 	// Test bad request
 	a = handlers.API(l, d).(*web.App)
@@ -72,23 +72,36 @@ func TestUsers(t *testing.T) {
 		t.Fatalf("\t%s Should receive a status code of 400. Received: %d", Failed, w.Code)
 	}
 	t.Logf("\t%s Should receive a status code of 400.", Success)
+}
+func TestCreateUser(t *testing.T) {
 
 	// Test create
-	a = handlers.API(l, d).(*web.App)
-	r = httptest.NewRequest("POST", "/v1/users", strings.NewReader(`{"email":"dean@dean.com","password":"test123","returnSecureToken":true}`))
-	w = httptest.NewRecorder()
+	a := handlers.API(l, d).(*web.App)
+	r := httptest.NewRequest("POST", "/v1/users", strings.NewReader(`{"email":"dean@dean.com","password":"test123","returnSecureToken":true}`))
+	w := httptest.NewRecorder()
 
 	a.ServeHTTP(w, r)
 
+	t.Logf("\tCreate user.")
 	if w.Code != http.StatusOK {
 		t.Fatalf("\t%s Should receive a status code of 200 for the response. Received: %d", Failed, w.Code)
 	}
 	t.Logf("\t%s Should receive a status code of 200.", Success)
+}
+
+type response struct {
+	IdToken string `json:"idToken"`
+}
+
+var s response
+var del []byte
+
+func TestSignin(t *testing.T) {
 
 	// Test signin
-	a = handlers.API(l, d).(*web.App)
-	r = httptest.NewRequest("GET", "/v1/signin", strings.NewReader(`{"email":"dean@dean.com","password":"test123","returnSecureToken":true}`))
-	w = httptest.NewRecorder()
+	a := handlers.API(l, d).(*web.App)
+	r := httptest.NewRequest("GET", "/v1/signin", strings.NewReader(`{"email":"dean@dean.com","password":"test123","returnSecureToken":true}`))
+	w := httptest.NewRecorder()
 
 	a.ServeHTTP(w, r)
 
@@ -96,22 +109,19 @@ func TestUsers(t *testing.T) {
 		t.Fatalf("\t%s Should receive a status code of 200 for the response. Received: %d", Failed, w.Code)
 	}
 	t.Logf("\t%s Should receive a status code of 200.", Success)
-
-	type response struct {
-		IdToken string `json:"idToken"`
-	}
-	var s response
 
 	json.NewDecoder(w.Body).Decode(&s)
 
-	del, _ := json.Marshal(&s)
+	del, _ = json.Marshal(&s)
+}
+func Testasdf(t *testing.T) {
 
 	// Test create credential
-	a = handlers.API(l, d).(*web.App)
-	r = httptest.NewRequest("POST", "/v1/credential", strings.NewReader(`{"username":"dean@dean.com","password":"test123","serviceName":"test_service"}`))
+	a := handlers.API(l, d).(*web.App)
+	r := httptest.NewRequest("POST", "/v1/credential", strings.NewReader(`{"username":"dean@dean.com","password":"test123","serviceName":"test_service"}`))
 	tt := fmt.Sprintf("Bearer %s", s.IdToken)
 	r.Header.Set("Authorization", tt)
-	w = httptest.NewRecorder()
+	w := httptest.NewRecorder()
 
 	a.ServeHTTP(w, r)
 
@@ -121,12 +131,15 @@ func TestUsers(t *testing.T) {
 		t.Fatalf("\t%s Should receive a status code of 200 for the response. Received: %d", Failed, w.Code)
 	}
 	t.Logf("\t%s Should receive a status code of 200.", Success)
+}
+
+func TestGetCredential(t *testing.T) {
 
 	// Test get credential
-	a = handlers.API(l, d).(*web.App)
-	r = httptest.NewRequest("GET", "/v1/credential/test_service", nil)
+	a := handlers.API(l, d).(*web.App)
+	r := httptest.NewRequest("GET", "/v1/credential/test_service", nil)
 	r.Header.Set("Authorization", tt)
-	w = httptest.NewRecorder()
+	w := httptest.NewRecorder()
 
 	a.ServeHTTP(w, r)
 	// b, _ := ioutil.ReadAll(w.Body)
@@ -134,13 +147,16 @@ func TestUsers(t *testing.T) {
 	if w.Code != http.StatusOK {
 		t.Logf("\t%s Should receive a status code of 200 for the response. Received: %d", Failed, w.Code)
 	}
+
 	t.Logf("\t%s Should receive a status code of 200.", Success)
+}
+func TestDeleteCredential(t *testing.T) {
 
 	// Test delete account
 
-	a = handlers.API(l, d).(*web.App)
-	r = httptest.NewRequest("DELETE", "/v1/users", strings.NewReader(string(del)))
-	w = httptest.NewRecorder()
+	a := handlers.API(l, d).(*web.App)
+	r := httptest.NewRequest("DELETE", "/v1/users", strings.NewReader(string(del)))
+	w := httptest.NewRecorder()
 
 	a.ServeHTTP(w, r)
 
