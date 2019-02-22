@@ -17,3 +17,7 @@ type Update struct {
 	// Username    string `json:"username" validate:"required"`
 	Password string `json:"password" validate:"required"`
 }
+
+type Service struct {
+	ServiceName string `json:"serviceName" db:"service_name"`
+}

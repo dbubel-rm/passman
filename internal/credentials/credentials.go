@@ -28,7 +28,6 @@ func DeleteCredentialDB(dbConn *sqlx.DB, serviceName string, localID interface{}
 	where service_name = ?
 	and local_id = ?`, serviceName, localID)
 	return err
-
 }
 
 func UpdateCredentialDB(dbConn *sqlx.DB, serviceName, password string, localID interface{}) error {
@@ -38,5 +37,10 @@ func UpdateCredentialDB(dbConn *sqlx.DB, serviceName, password string, localID i
 	where service_name = ?
 	and local_id = ?`, password, serviceName, localID)
 	return err
+}
 
+func GetServicesDB(dbConn *sqlx.DB, localID interface{}) (*[]Service, error) {
+	var serviceList []Service
+	err := dbConn.Select(&serviceList, `select service_name from credentials where local_id = ?`, localID)
+	return &serviceList, err
 }

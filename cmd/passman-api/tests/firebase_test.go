@@ -59,110 +59,158 @@ func init() {
 
 }
 
-func TestUsersEmptyPayload(t *testing.T) {
+func TestPassman(t *testing.T) {
 
 	// Test bad request
-	a = handlers.API(l, d).(*web.App)
+	a := handlers.API(l, d).(*web.App)
 	r := httptest.NewRequest("POST", "/v1/users", strings.NewReader("{}"))
 	w := httptest.NewRecorder()
 
 	a.ServeHTTP(w, r)
 
 	if w.Code != http.StatusBadRequest {
-		t.Fatalf("\t%s Should receive a status code of 400. Received: %d", Failed, w.Code)
+		b, _ := ioutil.ReadAll(w.Body)
+		fmt.Println(string(b))
+		t.Fatalf("\t%s Create user bad request failed.", Failed)
 	}
-	t.Logf("\t%s Should receive a status code of 400.", Success)
-}
-func TestCreateUser(t *testing.T) {
+	t.Logf("\t%s Create user bad request.", Success)
 
-	// Test create
-	a := handlers.API(l, d).(*web.App)
-	r := httptest.NewRequest("POST", "/v1/users", strings.NewReader(`{"email":"dean@dean.com","password":"test123","returnSecureToken":true}`))
-	w := httptest.NewRecorder()
-
-	a.ServeHTTP(w, r)
-
-	t.Logf("\tCreate user.")
-	if w.Code != http.StatusOK {
-		t.Fatalf("\t%s Should receive a status code of 200 for the response. Received: %d", Failed, w.Code)
-	}
-	t.Logf("\t%s Should receive a status code of 200.", Success)
-}
-
-type response struct {
-	IdToken string `json:"idToken"`
-}
-
-var s response
-var del []byte
-
-func TestSignin(t *testing.T) {
-
-	// Test signin
-	a := handlers.API(l, d).(*web.App)
-	r := httptest.NewRequest("GET", "/v1/signin", strings.NewReader(`{"email":"dean@dean.com","password":"test123","returnSecureToken":true}`))
-	w := httptest.NewRecorder()
-
-	a.ServeHTTP(w, r)
-
-	if w.Code != http.StatusOK {
-		t.Fatalf("\t%s Should receive a status code of 200 for the response. Received: %d", Failed, w.Code)
-	}
-	t.Logf("\t%s Should receive a status code of 200.", Success)
-
-	json.NewDecoder(w.Body).Decode(&s)
-
-	del, _ = json.Marshal(&s)
-}
-func Testasdf(t *testing.T) {
-
-	// Test create credential
-	a := handlers.API(l, d).(*web.App)
-	r := httptest.NewRequest("POST", "/v1/credential", strings.NewReader(`{"username":"dean@dean.com","password":"test123","serviceName":"test_service"}`))
-	tt := fmt.Sprintf("Bearer %s", s.IdToken)
-	r.Header.Set("Authorization", tt)
-	w := httptest.NewRecorder()
+	// Test create user
+	a = handlers.API(l, d).(*web.App)
+	r = httptest.NewRequest("POST", "/v1/users", strings.NewReader(`{"email":"dean@dean.com","password":"test123","returnSecureToken":true}`))
+	w = httptest.NewRecorder()
 
 	a.ServeHTTP(w, r)
 
 	if w.Code != http.StatusOK {
 		b, _ := ioutil.ReadAll(w.Body)
 		fmt.Println(string(b))
-		t.Fatalf("\t%s Should receive a status code of 200 for the response. Received: %d", Failed, w.Code)
+		t.Fatalf("\t%s Create user failed.", Failed)
 	}
-	t.Logf("\t%s Should receive a status code of 200.", Success)
-}
+	t.Logf("\t%s Create user.", Success)
 
-func TestGetCredential(t *testing.T) {
+	type response struct {
+		IdToken string `json:"idToken"`
+	}
+
+	var s response
+	var del []byte
+	var tt string
+
+	// Test signin
+	a = handlers.API(l, d).(*web.App)
+	r = httptest.NewRequest("GET", "/v1/signin", strings.NewReader(`{"email":"dean@dean.com","password":"test123","returnSecureToken":true}`))
+	w = httptest.NewRecorder()
+
+	a.ServeHTTP(w, r)
+
+	if w.Code != http.StatusOK {
+		t.Fatalf("\t%s Signin failed.", Failed)
+	}
+	t.Logf("\t%s Signin.", Success)
+
+	json.NewDecoder(w.Body).Decode(&s)
+
+	del, _ = json.Marshal(&s)
+
+	// Test create credential
+	a = handlers.API(l, d).(*web.App)
+	r = httptest.NewRequest("POST", "/v1/credential", strings.NewReader(`{"username":"dean@dean.com","password":"test123","serviceName":"test_service"}`))
+	tt = fmt.Sprintf("Bearer %s", s.IdToken)
+	r.Header.Set("Authorization", tt)
+	w = httptest.NewRecorder()
+
+	a.ServeHTTP(w, r)
+
+	if w.Code != http.StatusOK {
+		b, _ := ioutil.ReadAll(w.Body)
+		fmt.Println(string(b))
+		t.Fatalf("\t%s Create credential failed.", Failed)
+	}
+	t.Logf("\t%s Create credential.", Success)
 
 	// Test get credential
-	a := handlers.API(l, d).(*web.App)
-	r := httptest.NewRequest("GET", "/v1/credential/test_service", nil)
+	a = handlers.API(l, d).(*web.App)
+	r = httptest.NewRequest("GET", "/v1/credential/test_service", nil)
 	r.Header.Set("Authorization", tt)
-	w := httptest.NewRecorder()
+	w = httptest.NewRecorder()
 
 	a.ServeHTTP(w, r)
-	// b, _ := ioutil.ReadAll(w.Body)
-	// fmt.Println(string(b))
 	if w.Code != http.StatusOK {
-		t.Logf("\t%s Should receive a status code of 200 for the response. Received: %d", Failed, w.Code)
+		b, _ := ioutil.ReadAll(w.Body)
+		fmt.Println(string(b))
+		t.Fatalf("\t%s Get credential failed.", Failed)
 	}
 
-	t.Logf("\t%s Should receive a status code of 200.", Success)
-}
-func TestDeleteCredential(t *testing.T) {
+	t.Logf("\t%s Get credential.", Success)
+
+	// Test get services
+	a = handlers.API(l, d).(*web.App)
+	r = httptest.NewRequest("GET", "/v1/services", nil)
+	r.Header.Set("Authorization", tt)
+	w = httptest.NewRecorder()
+
+	a.ServeHTTP(w, r)
+	p, _ := ioutil.ReadAll(w.Body)
+	fmt.Println(string(p))
+	if w.Code != http.StatusOK {
+		b, _ := ioutil.ReadAll(w.Body)
+		fmt.Println(string(b))
+		t.Fatalf("\t%s Get services failed.", Failed)
+	}
+
+	t.Logf("\t%s Get services.", Success)
+
+	// Test update credential
+	a = handlers.API(l, d).(*web.App)
+	r = httptest.NewRequest("UPDATE", "/v1/credential", strings.NewReader(`{"password":"test1235","serviceName":"test_service"}`))
+	r.Header.Set("Authorization", tt)
+	w = httptest.NewRecorder()
+
+	a.ServeHTTP(w, r)
+	if w.Code != http.StatusOK {
+		b, _ := ioutil.ReadAll(w.Body)
+		fmt.Println(string(b))
+		t.Fatalf("\t%s Update credential failed.", Failed)
+	}
+
+	a = handlers.API(l, d).(*web.App)
+	r = httptest.NewRequest("GET", "/v1/credential/test_service", nil)
+	r.Header.Set("Authorization", tt)
+	w = httptest.NewRecorder()
+
+	a.ServeHTTP(w, r)
+	b, _ := ioutil.ReadAll(w.Body)
+	if !strings.Contains(string(b), "test1235") {
+		t.Fatalf("\t%s Update credential failed.", Failed)
+	}
+	t.Logf("\t%s Update credential.", Success)
+
+	// Test delete credential
+	a = handlers.API(l, d).(*web.App)
+	r = httptest.NewRequest("DELETE", "/v1/credential/test_service", nil)
+	r.Header.Set("Authorization", tt)
+	w = httptest.NewRecorder()
+
+	a.ServeHTTP(w, r)
+	if w.Code != http.StatusOK {
+		b, _ := ioutil.ReadAll(w.Body)
+		fmt.Println(string(b))
+		t.Fatalf("\t%s Delete credential failed.", Failed)
+	}
+
+	t.Logf("\t%s Delete credential.", Success)
 
 	// Test delete account
-
-	a := handlers.API(l, d).(*web.App)
-	r := httptest.NewRequest("DELETE", "/v1/users", strings.NewReader(string(del)))
-	w := httptest.NewRecorder()
+	a = handlers.API(l, d).(*web.App)
+	r = httptest.NewRequest("DELETE", "/v1/users", strings.NewReader(string(del)))
+	w = httptest.NewRecorder()
 
 	a.ServeHTTP(w, r)
 
 	if w.Code != http.StatusOK {
-		t.Fatalf("\t%s Should receive a status code of 200 for the response. Received: %d", Failed, w.Code)
+		t.Fatalf("\t%s Delete account failed.", Failed)
 	}
-	t.Logf("\t%s Should receive a status code of 200.", Success)
+	t.Logf("\t%s Delete account.", Success)
 
 }

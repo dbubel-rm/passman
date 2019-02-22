@@ -37,8 +37,9 @@ func API(log *log.Logger, db *db.MySQLDB) http.Handler {
 	app.Handle("GET", "/v1/credential/:serviceName", creds.get, mid.AuthHandler)
 	// delete a credential
 	app.Handle("DELETE", "/v1/credential/:serviceName", creds.delete, mid.AuthHandler)
-	app.Handle("POST", "/v1/credential", creds.update, mid.AuthHandler)
+	app.Handle("UPDATE", "/v1/credential", creds.update, mid.AuthHandler)
 	// TODO: get service names
+	app.Handle("GET", "/v1/services", creds.services, mid.AuthHandler)
 	// TODO: get credentials by ID
 
 	return app

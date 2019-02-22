@@ -59,3 +59,18 @@ func (c *Credentials) update(log *log.Logger, w http.ResponseWriter, r *http.Req
 	web.Respond(log, w, nil, http.StatusOK)
 	return nil
 }
+
+func (c *Credentials) services(log *log.Logger, w http.ResponseWriter, r *http.Request, params httprouter.Params) error {
+	// var newU credentials.Update
+	// if err := web.Unmarshal(r.Body, &newU); err != nil {
+	// 	return errors.Cause(err)
+	// }
+
+	services, err := credentials.GetServicesDB(c.MasterDB, r.Context().Value("localId"))
+
+	if err != nil {
+		web.RespondError(log, w, err, http.StatusInternalServerError)
+	}
+	web.Respond(log, w, services, http.StatusOK)
+	return nil
+}

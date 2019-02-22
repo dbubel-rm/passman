@@ -47,17 +47,17 @@ var passmanHome = "~/.passman/session.json"
 var argsWithoutProg = os.Args[1:]
 
 const (
-	CREATE_ACCOUNT = "create:account"
-	DELETE_ACCOUNT = "delete:account"
+	CREATE_ACCOUNT = "newAccount"
+	DELETE_ACCOUNT = "deleteAccount"
 	HELP           = "help"
 	VERSION        = "version"
-	GEN_PASS       = "gen:pass"
-	ADD_CRED       = "add:credential"
+	GEN_PASS       = "genPass"
+	ADD_CRED       = "addCredential"
 	LOGIN          = "login"
 	PASSMAN_MASTER = "PASSMAN_MASTER"
-	GET_CRED       = "get:credential"
-	GET_CREDS      = "get:credentials"
-	DELETE_CRED    = "delete:credential"
+	GET_CRED       = "getCredential"
+	// GET_CREDS      = "get:credentials"
+	DELETE_CRED = "deleteCredential"
 )
 
 func version() {
@@ -98,7 +98,7 @@ func displayOptions() {
 	fmt.Printf("\t%s\t\tDeletes ALL credentials saved under you active account. Ex) passman %s\n", DELETE_ACCOUNT, DELETE_ACCOUNT)
 	fmt.Printf("\t%s\t\tAdd a credential. Ex) passman %s serviceName\n", ADD_CRED, ADD_CRED)
 	fmt.Printf("\t%s\t\tGet a stored credential. Ex) passman %s serviceName\n", GET_CRED, GET_CRED)
-	fmt.Printf("\t%s\t\tGet all stored credentials. Ex) passman %s\n", GET_CREDS, GET_CREDS)
+	// fmt.Printf("\t%s\t\tGet all stored credentials. Ex) passman %s\n", GET_CREDS, GET_CREDS)
 	fmt.Printf("\t%s\t\tDeletes a stored credential. Ex) passman %s service_name\n", DELETE_CRED, DELETE_CRED)
 	fmt.Printf("\t%s\t\tAuthenticate a passman session good for 30 minutes\n", LOGIN)
 	fmt.Printf("\t%s\t\tGenerates a crypto random string to be used for a secure password\n", GEN_PASS)
@@ -128,7 +128,7 @@ func main() {
 	actions[GEN_PASS] = genPassword
 	// API calls
 	actions[LOGIN] = signin
-	actions[CREATE_ACCOUNT] = createAccount
+	actions[CREATE_ACCOUNT] = register
 	actions[DELETE_ACCOUNT] = deleteAccount
 	actions[ADD_CRED] = addCredential
 	actions[GET_CRED] = getCredential
@@ -170,6 +170,7 @@ func signin() {
 		log.Println("No account email specified")
 		return
 	}
+
 	username := argsWithoutProg[1]
 	password := os.Getenv(PASSMAN_MASTER)
 
@@ -301,7 +302,7 @@ func deleteAccount() {
 	os.Remove(passmanHome)
 }
 
-func createAccount() {
+func register() {
 	payloadCreateAccount := `{"email": "%s","password": "%s","returnSecureToken": true}`
 
 	username := argsWithoutProg[1]
