@@ -8,7 +8,6 @@ import (
 	"github.com/dbubel/passman/internal/platform/web"
 	"github.com/jmoiron/sqlx"
 	"github.com/julienschmidt/httprouter"
-	"github.com/pkg/errors"
 )
 
 type Credentials struct {
@@ -19,7 +18,7 @@ func (c *Credentials) add(log *log.Logger, w http.ResponseWriter, r *http.Reques
 	var add credentials.Add
 
 	if err := web.Unmarshal(r.Body, &add); err != nil {
-		return errors.Cause(err)
+		return err
 	}
 	defer r.Body.Close()
 
@@ -59,7 +58,7 @@ func (c *Credentials) update(log *log.Logger, w http.ResponseWriter, r *http.Req
 	var update credentials.Update
 
 	if err := web.Unmarshal(r.Body, &update); err != nil {
-		return errors.Cause(err)
+		return err
 	}
 	defer r.Body.Close()
 

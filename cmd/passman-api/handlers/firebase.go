@@ -9,7 +9,6 @@ import (
 	"github.com/dbubel/passman/internal/firebase"
 	"github.com/dbubel/passman/internal/platform/web"
 	"github.com/julienschmidt/httprouter"
-	"github.com/pkg/errors"
 )
 
 type Firebase struct {
@@ -61,7 +60,7 @@ func (f *Firebase) Signin(log *log.Logger, w http.ResponseWriter, r *http.Reques
 func (f *Firebase) Create(log *log.Logger, w http.ResponseWriter, r *http.Request, params httprouter.Params) error {
 	var createReq firebase.Create
 	if err := web.Unmarshal(r.Body, &createReq); err != nil {
-		return errors.Cause(err)
+		return err
 	}
 
 	defer r.Body.Close()
@@ -99,7 +98,7 @@ func (f *Firebase) Delete(log *log.Logger, w http.ResponseWriter, r *http.Reques
 	var deleteReq firebase.Delete
 
 	if err := web.Unmarshal(r.Body, &deleteReq); err != nil {
-		return errors.Cause(err)
+		return err
 	}
 
 	defer r.Body.Close()
@@ -137,7 +136,7 @@ func (f *Firebase) Verify(log *log.Logger, w http.ResponseWriter, r *http.Reques
 	var verifyReq firebase.Verify
 
 	if err := web.Unmarshal(r.Body, &verifyReq); err != nil {
-		return errors.Cause(err)
+		return err
 	}
 
 	defer r.Body.Close()
