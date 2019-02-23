@@ -23,6 +23,14 @@ const (
 
 var publicPEM map[string]string
 
+func FakeAuth(before web.Handler) web.Handler {
+	return func(log *log.Logger, w http.ResponseWriter, r *http.Request, params httprouter.Params) error {
+		ctx := context.WithValue(r.Context(), "localId", "fake")
+		err := before(log, w, r.WithContext(ctx), params)
+		return err
+	}
+}
+
 // RequestLogger writes some information about the request to the logs in
 // the format: TraceID : (200) GET /foo -> IP ADDR (latency)
 func AuthHandler(before web.Handler) web.Handler {
@@ -77,6 +85,11 @@ func AuthHandler(before web.Handler) web.Handler {
 		// No valid jwt was found
 		if err != nil {
 			return errors.New("no valid token found")
+		}
+
+		emailVerified, ok := tok.Claims.(jwt.MapClaims)["email_verified"].(bool)
+		if emailVerified != true || !ok {
+			return errors.New("Email not verified")
 		}
 
 		iss, ok := tok.Claims.(jwt.MapClaims)["iss"].(string)

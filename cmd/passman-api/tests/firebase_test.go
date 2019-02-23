@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/dbubel/passman/cmd/passman-api/handlers"
+	"github.com/dbubel/passman/internal/mid"
 	"github.com/dbubel/passman/internal/platform/db"
 	"github.com/dbubel/passman/internal/platform/web"
 )
@@ -25,8 +26,10 @@ const (
 
 var d *db.MySQLDB
 var l *log.Logger
+var f web.Middleware
 
 func init() {
+	f = mid.FakeAuth
 	l = log.New(ioutil.Discard, "", log.LstdFlags|log.Lmicroseconds|log.Lshortfile)
 	var err error
 	for i := 0; i < 20; i++ {
@@ -62,7 +65,8 @@ func init() {
 func TestPassman(t *testing.T) {
 
 	// Test bad request
-	a := handlers.API(l, d).(*web.App)
+
+	a := handlers.API(l, d, f).(*web.App)
 	r := httptest.NewRequest("POST", "/v1/users", strings.NewReader("{}"))
 	w := httptest.NewRecorder()
 
@@ -76,7 +80,8 @@ func TestPassman(t *testing.T) {
 	t.Logf("\t%s Create user bad request.", Success)
 
 	// Test create user
-	a = handlers.API(l, d).(*web.App)
+	a = handlers.API(l, d, f).(*web.App)
+
 	r = httptest.NewRequest("POST", "/v1/users", strings.NewReader(`{"email":"dean@dean.com","password":"test123","returnSecureToken":true}`))
 	w = httptest.NewRecorder()
 
@@ -98,7 +103,7 @@ func TestPassman(t *testing.T) {
 	var tt string
 
 	// Test signin
-	a = handlers.API(l, d).(*web.App)
+	a = handlers.API(l, d, f).(*web.App)
 	r = httptest.NewRequest("GET", "/v1/signin", strings.NewReader(`{"email":"dean@dean.com","password":"test123","returnSecureToken":true}`))
 	w = httptest.NewRecorder()
 
@@ -114,7 +119,7 @@ func TestPassman(t *testing.T) {
 	del, _ = json.Marshal(&s)
 
 	// Test create credential
-	a = handlers.API(l, d).(*web.App)
+	a = handlers.API(l, d, f).(*web.App)
 	r = httptest.NewRequest("POST", "/v1/credential", strings.NewReader(`{"username":"dean@dean.com","password":"test123","serviceName":"test_service"}`))
 	tt = fmt.Sprintf("Bearer %s", s.IdToken)
 	r.Header.Set("Authorization", tt)
@@ -130,7 +135,7 @@ func TestPassman(t *testing.T) {
 	t.Logf("\t%s Create credential.", Success)
 
 	// Test get credential
-	a = handlers.API(l, d).(*web.App)
+	a = handlers.API(l, d, f).(*web.App)
 	r = httptest.NewRequest("GET", "/v1/credential/test_service", nil)
 	r.Header.Set("Authorization", tt)
 	w = httptest.NewRecorder()
@@ -145,7 +150,7 @@ func TestPassman(t *testing.T) {
 	t.Logf("\t%s Get credential.", Success)
 
 	// Test get services
-	a = handlers.API(l, d).(*web.App)
+	a = handlers.API(l, d, f).(*web.App)
 	r = httptest.NewRequest("GET", "/v1/services", nil)
 	r.Header.Set("Authorization", tt)
 	w = httptest.NewRecorder()
@@ -162,19 +167,19 @@ func TestPassman(t *testing.T) {
 	t.Logf("\t%s Get services.", Success)
 
 	// Test update credential
-	a = handlers.API(l, d).(*web.App)
-	r = httptest.NewRequest("UPDATE", "/v1/credential", strings.NewReader(`{"password":"test1235","serviceName":"test_service"}`))
+	a = handlers.API(l, d, f).(*web.App)
+	r = httptest.NewRequest("POST", "/v1/credential/update", strings.NewReader(`{"password":"test1235","serviceName":"test_service"}`))
 	r.Header.Set("Authorization", tt)
 	w = httptest.NewRecorder()
 
 	a.ServeHTTP(w, r)
 	if w.Code != http.StatusOK {
 		b, _ := ioutil.ReadAll(w.Body)
-		fmt.Println(string(b))
+		fmt.Println("HERE", w.Code, string(b))
 		t.Fatalf("\t%s Update credential failed.", Failed)
 	}
 
-	a = handlers.API(l, d).(*web.App)
+	a = handlers.API(l, d, f).(*web.App)
 	r = httptest.NewRequest("GET", "/v1/credential/test_service", nil)
 	r.Header.Set("Authorization", tt)
 	w = httptest.NewRecorder()
@@ -182,12 +187,14 @@ func TestPassman(t *testing.T) {
 	a.ServeHTTP(w, r)
 	b, _ := ioutil.ReadAll(w.Body)
 	if !strings.Contains(string(b), "test1235") {
+		fmt.Println(string(b))
+		fmt.Println("HERE", w.Code, string(b))
 		t.Fatalf("\t%s Update credential failed.", Failed)
 	}
 	t.Logf("\t%s Update credential.", Success)
 
 	// Test delete credential
-	a = handlers.API(l, d).(*web.App)
+	a = handlers.API(l, d, f).(*web.App)
 	r = httptest.NewRequest("DELETE", "/v1/credential/test_service", nil)
 	r.Header.Set("Authorization", tt)
 	w = httptest.NewRecorder()
@@ -202,7 +209,7 @@ func TestPassman(t *testing.T) {
 	t.Logf("\t%s Delete credential.", Success)
 
 	// Test delete account
-	a = handlers.API(l, d).(*web.App)
+	a = handlers.API(l, d, f).(*web.App)
 	r = httptest.NewRequest("DELETE", "/v1/users", strings.NewReader(string(del)))
 	w = httptest.NewRecorder()
 

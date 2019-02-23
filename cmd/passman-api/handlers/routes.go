@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 
@@ -10,7 +11,7 @@ import (
 )
 
 // API returns a handler for a set of routes.
-func API(log *log.Logger, db *db.MySQLDB) http.Handler {
+func API(log *log.Logger, db *db.MySQLDB, auth web.Middleware) http.Handler {
 
 	app := web.New(log, mid.RequestLogger)
 
@@ -19,10 +20,14 @@ func API(log *log.Logger, db *db.MySQLDB) http.Handler {
 	}
 	app.Handle("GET", "/v1/health", check.Health)
 
-	f := Firebase{}
+	apiKey := "AIzaSyBItfzjx74wXWCet-ARldNNpKIZVR1PQ5I%0A"
+	f := Firebase{
+		SigninURL: fmt.Sprintf("https://www.googleapis.com/identitytoolkit/v3/relyingparty/verifyPassword?key=%s", apiKey),
+	}
 
 	// TODO: update account password
 	app.Handle("POST", "/v1/users", f.Create)
+	app.Handle("POST", "/v1/users/verify", f.Verify)
 	app.Handle("DELETE", "/v1/users", f.Delete)
 	app.Handle("GET", "/v1/signin", f.Signin)
 
@@ -32,14 +37,12 @@ func API(log *log.Logger, db *db.MySQLDB) http.Handler {
 
 	// TODO: make a time since password rotation field
 	// store a new credential
-	app.Handle("POST", "/v1/credential", creds.add, mid.AuthHandler)
-	//get a credential
-	app.Handle("GET", "/v1/credential/:serviceName", creds.get, mid.AuthHandler)
-	// delete a credential
-	app.Handle("DELETE", "/v1/credential/:serviceName", creds.delete, mid.AuthHandler)
-	app.Handle("UPDATE", "/v1/credential", creds.update, mid.AuthHandler)
-	// TODO: get service names
-	app.Handle("GET", "/v1/services", creds.services, mid.AuthHandler)
+
+	app.Handle("POST", "/v1/credential", creds.add, auth)
+	app.Handle("GET", "/v1/credential/:serviceName", creds.get, auth)
+	app.Handle("DELETE", "/v1/credential/:serviceName", creds.delete, auth)
+	app.Handle("POST", "/v1/credential/update", creds.update, auth)
+	app.Handle("GET", "/v1/services", creds.services, auth)
 	// TODO: get credentials by ID
 
 	return app

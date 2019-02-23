@@ -21,7 +21,6 @@ import (
 
 	"github.com/olekukonko/tablewriter"
 	"golang.org/x/crypto/bcrypt"
-	"golang.org/x/crypto/ssh/terminal"
 )
 
 type FirebaseStruct struct {
@@ -42,22 +41,27 @@ var urlCreateAccount = baseUrl + "/v1/users"
 var urlDeleteUser = baseUrl + "/v1/users"
 var urlAuthUser = baseUrl + "/v1/signin"
 var urlNewCredential = baseUrl + "/v1/credential"
+var urlUpdateCredential = baseUrl + "/v1/credential/update"
+var urlServices = baseUrl + "/v1/services"
+var urlVerifyAccount = baseUrl + "/v1/users/verify"
 var passmanHome = "~/.passman/session.json"
 
 var argsWithoutProg = os.Args[1:]
 
 const (
-	CREATE_ACCOUNT = "newAccount"
-	DELETE_ACCOUNT = "deleteAccount"
+	CREATE_ACCOUNT = "init"
+	DELETE_ACCOUNT = "del"
 	HELP           = "help"
 	VERSION        = "version"
-	GEN_PASS       = "genPass"
-	ADD_CRED       = "addCredential"
+	GEN_PASS       = "rand"
+	ADD_CRED       = "insert"
 	LOGIN          = "login"
 	PASSMAN_MASTER = "PASSMAN_MASTER"
-	GET_CRED       = "getCredential"
+	GET_CRED       = "get"
 	// GET_CREDS      = "get:credentials"
-	DELETE_CRED = "deleteCredential"
+	DELETE_CRED = "rm"
+	SERVICES    = "services"
+	UPDATE      = "update"
 )
 
 func version() {
@@ -86,7 +90,7 @@ func GenerateRandomString(n int) (string, error) {
 	return string(bytes), nil
 }
 
-func displayOptions() {
+func help() {
 	fmt.Println("Passman is a utility for managing your passwords.")
 	fmt.Println("")
 	fmt.Println("Usage:")
@@ -123,7 +127,7 @@ func main() {
 	log.SetFlags(log.Lshortfile)
 
 	actions := make(map[string]func())
-	actions[HELP] = displayOptions
+	actions[HELP] = help
 	actions[VERSION] = version
 	actions[GEN_PASS] = genPassword
 	// API calls
@@ -133,11 +137,12 @@ func main() {
 	actions[ADD_CRED] = addCredential
 	actions[GET_CRED] = getCredential
 	actions[DELETE_CRED] = deleteCredential
-	// actions[GET_CREDS] = getCredentials
+	actions[SERVICES] = getServices
+	actions[UPDATE] = update
 
 	if len(argsWithoutProg) == 0 {
 		log.Println("No action specified")
-		displayOptions()
+		help()
 		return
 	}
 
@@ -150,20 +155,20 @@ func main() {
 		f()
 	} else {
 		log.Println("Invalid action specified")
-		displayOptions()
+		help()
 	}
 }
 
-func getUsernameAndPassword() (string, string) {
-	fmt.Print("Username: ")
-	text, _ := bufio.NewReader(os.Stdin).ReadString('\n')
-	text = cleanInput(text)
-	fmt.Print("Password: ")
-	bytePassword, _ := terminal.ReadPassword(int(os.Stdin.Fd()))
-	password := cleanInput(string(bytePassword))
-	fmt.Println("")
-	return text, password
-}
+// func getUsernameAndPassword() (string, string) {
+// 	fmt.Print("Username: ")
+// 	text, _ := bufio.NewReader(os.Stdin).ReadString('\n')
+// 	text = cleanInput(text)
+// 	fmt.Print("Password: ")
+// 	bytePassword, _ := terminal.ReadPassword(int(os.Stdin.Fd()))
+// 	password := cleanInput(string(bytePassword))
+// 	fmt.Println("")
+// 	return text, password
+// }
 
 func signin() {
 	if len(argsWithoutProg) < 2 {
@@ -176,7 +181,7 @@ func signin() {
 
 	var payload = `{"email":"%s","password":"%s","returnSecureToken": true}`
 	payload = fmt.Sprintf(payload, username, password)
-	fmt.Println(payload)
+	// fmt.Println(payload)
 	req, err := http.NewRequest("GET", urlAuthUser, strings.NewReader(payload))
 
 	if err != nil {
@@ -343,12 +348,30 @@ func register() {
 		log.Println(err.Error())
 		return
 	}
+	type response struct {
+		IdToken string `json:"idToken"`
+	}
+	var id response
+	json.Unmarshal(body, &id)
+
+	payloadVerifyAccount := fmt.Sprintf(`{"requestType": "VERIFY_EMAIL","idToken": "%s"}`, id.IdToken)
+
+	req, err = http.NewRequest("POST", urlVerifyAccount, strings.NewReader(payloadVerifyAccount))
+
+	res, err = http.DefaultClient.Do(req)
+
+	if err != nil {
+		log.Println(err.Error())
+		return
+	}
+
+	body, _ = ioutil.ReadAll(res.Body)
 
 	log.Println("Account created OK")
 }
 
 func addCredential() {
-	if len(argsWithoutProg) < 2 {
+	if len(argsWithoutProg) < 4 {
 		log.Println("No service name")
 		return
 	}
@@ -370,23 +393,23 @@ func addCredential() {
 		return
 	}
 
-	username, password := getUsernameAndPassword()
+	username, password := argsWithoutProg[2], argsWithoutProg[3]
 	fmt.Print("Confirm: ")
 
-	bytePasswordConfirm, err := terminal.ReadPassword(int(os.Stdin.Fd()))
+	// bytePasswordConfirm, err := terminal.ReadPassword(int(os.Stdin.Fd()))
 
-	if err != nil {
-		fmt.Println(err.Error())
-		return
-	}
+	// if err != nil {
+	// 	fmt.Println(err.Error())
+	// 	return
+	// }
 
-	passwordConfirm := cleanInput(string(bytePasswordConfirm))
-	fmt.Println()
+	// passwordConfirm := cleanInput(string(bytePasswordConfirm))
+	// fmt.Println()
 
-	if password != passwordConfirm {
-		fmt.Println("Passwords do not match")
-		return
-	}
+	// if password != passwordConfirm {
+	// 	fmt.Println("Passwords do not match")
+	// 	return
+	// }
 
 	password = encrypt([]byte(password), os.Getenv(PASSMAN_MASTER))
 	username = encrypt([]byte(username), os.Getenv(PASSMAN_MASTER))
@@ -422,6 +445,83 @@ func addCredential() {
 	}
 
 	log.Println("Credential added OK")
+}
+
+func update() {
+	if len(argsWithoutProg) < 3 {
+		log.Println("No service name")
+		return
+	}
+
+	newCredentialPayload := `{"serviceName": "%s","password": "%s"}`
+
+	tokenData, err := getUserStore()
+
+	if err != nil {
+		log.Println(err.Error())
+		return
+	}
+
+	var storedJWT FirebaseStruct
+	err = json.Unmarshal(tokenData, &storedJWT)
+
+	if err != nil {
+		log.Println(err.Error())
+		return
+	}
+
+	username, password := argsWithoutProg[1], argsWithoutProg[2]
+	// fmt.Print("Confirm: ")
+
+	// bytePasswordConfirm, err := terminal.ReadPassword(int(os.Stdin.Fd()))
+
+	// if err != nil {
+	// 	fmt.Println(err.Error())
+	// 	return
+	// }
+
+	// passwordConfirm := cleanInput(string(bytePasswordConfirm))
+	// fmt.Println()
+
+	// if password != passwordConfirm {
+	// 	fmt.Println("Passwords do not match")
+	// 	return
+	// }
+
+	password = encrypt([]byte(password), os.Getenv(PASSMAN_MASTER))
+	// username = encrypt([]byte(username), os.Getenv(PASSMAN_MASTER))
+	// serviceName = argsWithoutProg[1]
+	newCredentialPayload = fmt.Sprintf(newCredentialPayload, username, password)
+	req, err := http.NewRequest("POST", urlUpdateCredential, strings.NewReader(newCredentialPayload))
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", storedJWT.IDToken))
+
+	if err != nil {
+		log.Println(err.Error())
+		return
+	}
+
+	res, err := http.DefaultClient.Do(req)
+
+	if err != nil {
+		log.Println(err.Error())
+		return
+	}
+
+	body, _ := ioutil.ReadAll(res.Body)
+
+	if err != nil {
+		log.Println(err.Error())
+		return
+	}
+
+	defer res.Body.Close()
+
+	if res.StatusCode != 200 {
+		log.Println(string(body))
+		return
+	}
+
+	log.Println("Credential updated OK")
 }
 
 func getCredential() {
@@ -509,6 +609,92 @@ func getCredential() {
 		table.Append(v)
 	}
 	table.Render() // Send output
+}
+
+func getServices() {
+	// if len(argsWithoutProg) < 2 {
+	// 	log.Println("No service name")
+	// 	return
+	// }
+
+	// serviceName := ""
+	tokenData, err := getUserStore()
+
+	if err != nil {
+		log.Println(err.Error())
+		return
+	}
+
+	var storedJWT FirebaseStruct
+	err = json.Unmarshal(tokenData, &storedJWT)
+
+	if err != nil {
+		log.Println(err.Error())
+	}
+
+	// serviceName = argsWithoutProg[1]
+	req, err := http.NewRequest("GET", urlServices+"/", nil)
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", storedJWT.IDToken))
+
+	if err != nil {
+		log.Println(err.Error())
+		return
+	}
+
+	res, err := http.DefaultClient.Do(req)
+
+	if err != nil {
+		log.Println(err.Error())
+		return
+	}
+
+	body, _ := ioutil.ReadAll(res.Body)
+
+	if err != nil {
+		log.Println(err.Error())
+	}
+
+	defer res.Body.Close()
+
+	if res.StatusCode != 200 {
+		log.Println(string(body))
+		return
+	}
+
+	var credentialRecord = []struct {
+		ServiceName string
+	}{}
+
+	err = json.Unmarshal(body, &credentialRecord)
+
+	if err != nil {
+		log.Println(err.Error())
+		return
+	}
+	fmt.Println(credentialRecord)
+
+	// sDec, err := b64.StdEncoding.DecodeString(credentialRecord.Password)
+	// uName, _ := b64.StdEncoding.DecodeString(credentialRecord.Username)
+
+	// if err != nil {
+	// 	log.Println(err.Error())
+	// 	return
+	// }
+
+	// credentialRecord.Password = string(decrypt([]byte(sDec), os.Getenv(PASSMAN_MASTER)))
+	// credentialRecord.Username = string(decrypt([]byte(uName), os.Getenv(PASSMAN_MASTER)))
+
+	// data := [][]string{
+	// 	[]string{credentialRecord.ServiceName, credentialRecord.Username, credentialRecord.Password},
+	// }
+
+	// table := tablewriter.NewWriter(os.Stdout)
+	// table.SetHeader([]string{"service name", "username", "password"})
+
+	// for _, v := range data {
+	// 	table.Append(v)
+	// }
+	// table.Render() // Send output
 }
 
 // func getCredentials() {

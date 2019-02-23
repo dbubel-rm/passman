@@ -1,2 +1,2 @@
-FROM mysql/mysql-server:5.7.22
+FROM mysql/mysql-server:8.0.15
 COPY schema.sql /docker-entrypoint-initdb.d/

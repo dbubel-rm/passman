@@ -1,5 +1,5 @@
 locals {
-  staging_availability_zones = ["us-east-1a", "us-east-1b"]
+  staging_availability_zones = ["us-east-1a"]
 }
 
 provider "aws" {

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/dbubel/passman/internal/mid"
 	"context"
 	"encoding/json"
 	"log"
@@ -54,7 +55,7 @@ func main() {
 	// Start API
 	api := http.Server{
 		Addr:           cfg.Web.APIHost,
-		Handler:        handlers.API(log, masterDB),
+		Handler:        handlers.API(log, masterDB, mid.AuthHandler),
 		MaxHeaderBytes: 1 << 20,
 		ReadTimeout:    cfg.Web.ReadTimeout,
 		WriteTimeout:   cfg.Web.WriteTimeout,
