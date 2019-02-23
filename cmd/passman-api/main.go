@@ -1,7 +1,6 @@
 package main
 
 import (
-	"github.com/dbubel/passman/internal/mid"
 	"context"
 	"encoding/json"
 	"log"
@@ -12,6 +11,8 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/dbubel/passman/internal/mid"
+
 	"github.com/dbubel/passman/cmd/passman-api/handlers"
 	"github.com/dbubel/passman/internal/platform/db"
 	"github.com/kelseyhightower/envconfig"
@@ -20,7 +21,7 @@ import (
 var build = "develop"
 
 func main() {
-	log := log.New(os.Stdout, "PASSMAN : ", log.LstdFlags|log.Lmicroseconds|log.Lshortfile)
+	log := log.New(os.Stdout, "", log.LstdFlags|log.Lmicroseconds|log.Lshortfile)
 
 	var cfg struct {
 		Web struct {
@@ -35,14 +36,14 @@ func main() {
 		}
 	}
 
-	if err := envconfig.Process("SALES", &cfg); err != nil {
+	if err := envconfig.Process("PASSMAN", &cfg); err != nil {
 		log.Fatalf("Parsing Config : %v", err)
 	}
 
 	// =========================================================================
 	// Start MySQL
 
-	log.Println("main : Started : Initialize Mongo")
+	log.Println("main : Started : Initialize MySQL")
 	masterDB, err := db.New(cfg.DB.Host)
 	if err != nil {
 		log.Fatalf("main : Register DB : %v", err)
@@ -68,7 +69,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("Marshalling Config to JSON : %v", err)
 	}
-	log.Printf("Config : %v\n", string(cfgJSON))
+	log.Printf("%v\n", string(cfgJSON))
 
 	// Make a channel to listen for errors coming from the listener. Use a
 	// buffered channel so the goroutine can exit if we don't collect this error.
@@ -85,20 +86,21 @@ func main() {
 	// /debug/vars - Added to the default mux by the expvars package.
 	// /debug/pprof - Added to the default mux by the net/http/pprof package.
 
-	debug := http.Server{
-		Addr:           cfg.Web.DebugHost,
-		Handler:        http.DefaultServeMux,
-		ReadTimeout:    cfg.Web.ReadTimeout,
-		WriteTimeout:   cfg.Web.WriteTimeout,
-		MaxHeaderBytes: 1 << 20,
-	}
+	// debug := http.Server{
+	// 	Addr:           cfg.Web.DebugHost,
+	// 	Handler:        http.DefaultServeMux,
+	// 	ReadTimeout:    cfg.Web.ReadTimeout,
+	// 	WriteTimeout:   cfg.Web.WriteTimeout,
+	// 	MaxHeaderBytes: 1 << 20,
+	// }
 
-	// Not concerned with shutting this down when the
-	// application is being shutdown.
-	go func() {
-		log.Printf("Debug Listening %s", cfg.Web.DebugHost)
-		log.Printf("Debug Listener closed : %v", debug.ListenAndServe())
-	}()
+	// // Not concerned with shutting this down when the
+	// // application is being shutdown.
+	// go func() {
+	// 	log.Printf("Debug Listening %s", cfg.Web.DebugHost)
+	// 	log.Printf("Debug Listener closed : %v", debug.ListenAndServe())
+	// }()
+	
 
 	// Shutdown
 

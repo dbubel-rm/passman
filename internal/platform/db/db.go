@@ -13,8 +13,6 @@ type MySQLDB struct {
 	Database *sqlx.DB
 }
 
-// New returns a new DB value for use with MongoDB based on a registered
-// master session.
 func New(url string) (*MySQLDB, error) {
 	// db, err := sqlx.Connect("mysql", "passman:wtfthispasswordNeedsLonger29@tcp(production-database.cfneifgjtyib.us-east-1.rds.amazonaws.com:3306)/passman")
 	mysql, err := sqlx.Connect("mysql", url)

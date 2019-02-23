@@ -12,24 +12,28 @@ import (
 
 // API returns a handler for a set of routes.
 func API(log *log.Logger, db *db.MySQLDB, auth web.Middleware) http.Handler {
-
-	app := web.New(log, mid.RequestLogger)
+	var app = web.New(log, mid.RequestLogger)
 
 	check := Check{
 		MasterDB: db.Database,
 	}
+
 	app.Handle("GET", "/v1/health", check.Health)
 
-	apiKey := "AIzaSyBItfzjx74wXWCet-ARldNNpKIZVR1PQ5I%0A"
-	f := Firebase{
-		SigninURL: fmt.Sprintf("https://www.googleapis.com/identitytoolkit/v3/relyingparty/verifyPassword?key=%s", apiKey),
+	var apiKey = "AIzaSyBItfzjx74wXWCet-ARldNNpKIZVR1PQ5I%0A"
+	var firebaseBaseURL = "https://www.googleapis.com/identitytoolkit/v3/relyingparty"
+	firebase := Firebase{
+		SigninURL: fmt.Sprintf("%s/verifyPassword?key=%s", firebaseBaseURL, apiKey),
+		CreateURL: fmt.Sprintf("%s/signupNewUser?key=%s", firebaseBaseURL, apiKey),
+		DeleteURL: fmt.Sprintf("%s/deleteAccount?key=%s", firebaseBaseURL, apiKey),
+		VerifyURL: fmt.Sprintf("%s/getOobConfirmationCode?key=%s", firebaseBaseURL, apiKey),
 	}
 
 	// TODO: update account password
-	app.Handle("POST", "/v1/users", f.Create)
-	app.Handle("POST", "/v1/users/verify", f.Verify)
-	app.Handle("DELETE", "/v1/users", f.Delete)
-	app.Handle("GET", "/v1/signin", f.Signin)
+	app.Handle("POST", "/v1/users", firebase.Create)
+	app.Handle("POST", "/v1/users/verify", firebase.Verify)
+	app.Handle("DELETE", "/v1/users", firebase.Delete)
+	app.Handle("GET", "/v1/signin", firebase.Signin)
 
 	creds := Credentials{
 		MasterDB: db.Database,
@@ -47,17 +51,3 @@ func API(log *log.Logger, db *db.MySQLDB, auth web.Middleware) http.Handler {
 
 	return app
 }
-
-// func translate(err error) error {
-// 	switch errors.Cause(err) {
-// 	case user.ErrNotFound:
-// 		return web.ErrNotFound
-// 	case user.ErrInvalidID:
-// 		return web.ErrInvalidID
-// 	case user.ErrAuthenticationFailure:
-// 		return web.ErrUnauthorized
-// 	case user.ErrForbidden:
-// 		return web.ErrForbidden
-// 	}
-// 	return err
-// }

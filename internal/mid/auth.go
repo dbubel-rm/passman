@@ -9,6 +9,7 @@ import (
 	"log"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/dbubel/passman/internal/platform/web"
 	jwt "github.com/dgrijalva/jwt-go"
@@ -23,6 +24,7 @@ const (
 
 var publicPEM map[string]string
 
+// Used only for integration tests
 func FakeAuth(before web.Handler) web.Handler {
 	return func(log *log.Logger, w http.ResponseWriter, r *http.Request, params httprouter.Params) error {
 		ctx := context.WithValue(r.Context(), "localId", "fake")
@@ -31,30 +33,43 @@ func FakeAuth(before web.Handler) web.Handler {
 	}
 }
 
-// RequestLogger writes some information about the request to the logs in
-// the format: TraceID : (200) GET /foo -> IP ADDR (latency)
+var keyDownloadedAt time.Time
+
+func init() {
+	getKey()
+}
+func getKey() error {
+	var err error
+	var respBody []byte
+	resp, err := http.Get(PUBLIC_KEY_URL)
+
+	if err != nil {
+		return err
+	}
+
+	defer resp.Body.Close()
+
+	respBody, err = ioutil.ReadAll(resp.Body)
+
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(respBody, &publicPEM)
+	if err != nil {
+		return err
+	}
+	keyDownloadedAt = time.Now()
+	return nil
+}
+
+// AuthHandler validates a JWT present in the request.
 func AuthHandler(before web.Handler) web.Handler {
 	// Wrap this handler around the next one provided.
 	return func(log *log.Logger, w http.ResponseWriter, r *http.Request, params httprouter.Params) error {
-
-		var respBody []byte
-		resp, err := http.Get(PUBLIC_KEY_URL)
-
-		if err != nil {
-			return err
-		}
-
-		defer resp.Body.Close()
-
-		respBody, err = ioutil.ReadAll(resp.Body)
-
-		if err != nil {
-			return err
-		}
-
-		err = json.Unmarshal(respBody, &publicPEM)
-		if err != nil {
-			return err
+		var err error
+		if !keyDownloadedAt.After(time.Now().Add(time.Hour * -1)) {
+			getKey()
 		}
 
 		var publicKey *rsa.PublicKey

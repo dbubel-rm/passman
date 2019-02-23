@@ -21,6 +21,7 @@ func (c *Credentials) add(log *log.Logger, w http.ResponseWriter, r *http.Reques
 	if err := web.Unmarshal(r.Body, &add); err != nil {
 		return errors.Cause(err)
 	}
+	defer r.Body.Close()
 
 	err := credentials.AddCredentialDB(c.MasterDB, &add, r.Context().Value("localId"))
 
@@ -60,6 +61,7 @@ func (c *Credentials) update(log *log.Logger, w http.ResponseWriter, r *http.Req
 	if err := web.Unmarshal(r.Body, &update); err != nil {
 		return errors.Cause(err)
 	}
+	defer r.Body.Close()
 
 	err := credentials.UpdateCredentialDB(c.MasterDB, update.ServiceName, update.Password, r.Context().Value("localId"))
 
