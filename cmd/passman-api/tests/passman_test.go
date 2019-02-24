@@ -211,11 +211,14 @@ func TestPassman(t *testing.T) {
 	// Test delete account
 	a = handlers.API(l, d, f).(*web.App)
 	r = httptest.NewRequest("DELETE", "/v1/users", strings.NewReader(string(del)))
+	r.Header.Set("Authorization", tt)
 	w = httptest.NewRecorder()
 
 	a.ServeHTTP(w, r)
 
 	if w.Code != http.StatusOK {
+		b, _ := ioutil.ReadAll(w.Body)
+		fmt.Println(string(b))
 		t.Fatalf("\t%s Delete account failed.", Failed)
 	}
 	t.Logf("\t%s Delete account.", Success)

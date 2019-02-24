@@ -49,19 +49,19 @@ var passmanHome = "~/.passman/session.json"
 var argsWithoutProg = os.Args[1:]
 
 const (
-	CREATE_ACCOUNT = "init"
-	DELETE_ACCOUNT = "del"
-	HELP           = "help"
-	VERSION        = "version"
-	GEN_PASS       = "rand"
-	ADD_CRED       = "insert"
-	LOGIN          = "login"
-	PASSMAN_MASTER = "PASSMAN_MASTER"
-	GET_CRED       = "get"
+	REGISTER_ACCOUNT  = "init"
+	NUKE_ACCOUNT      = "nuke"
+	HELP              = "help"
+	VERSION           = "version"
+	GEN_PASS          = "rand"
+	INSERT_CREDENTIAL = "insert"
+	LOGIN             = "login"
+	PASSMAN_MASTER    = "PASSMAN_MASTER"
+	GET_CREDENTIAL    = "get"
 	// GET_CREDS      = "get:credentials"
-	DELETE_CRED = "rm"
-	SERVICES    = "services"
-	UPDATE      = "update"
+	RM_CREDENTIAL     = "rm"
+	GET_SERVICES      = "services"
+	UPDATE_CREDENTIAL = "update"
 )
 
 func version() {
@@ -98,14 +98,13 @@ func help() {
 	fmt.Println("")
 	fmt.Println("The commands are:")
 	fmt.Println("")
-	fmt.Printf("\t%s\t\tCreates a new passman account. Ex) passman %s newexample@example.com\n", CREATE_ACCOUNT, CREATE_ACCOUNT)
-	fmt.Printf("\t%s\t\tDeletes ALL credentials saved under you active account. Ex) passman %s\n", DELETE_ACCOUNT, DELETE_ACCOUNT)
-	fmt.Printf("\t%s\t\tAdd a credential. Ex) passman %s serviceName\n", ADD_CRED, ADD_CRED)
-	fmt.Printf("\t%s\t\tGet a stored credential. Ex) passman %s serviceName\n", GET_CRED, GET_CRED)
-	// fmt.Printf("\t%s\t\tGet all stored credentials. Ex) passman %s\n", GET_CREDS, GET_CREDS)
-	fmt.Printf("\t%s\t\tDeletes a stored credential. Ex) passman %s service_name\n", DELETE_CRED, DELETE_CRED)
+	fmt.Printf("\t%s\t\tCreates a new passman account. Ex) passman %s newexample@example.com\n", REGISTER_ACCOUNT, REGISTER_ACCOUNT)
+	fmt.Printf("\t%s\t\tInsert a credential. Ex) passman %s serviceName username password\n", INSERT_CREDENTIAL, INSERT_CREDENTIAL)
+	fmt.Printf("\t%s\t\tGet a stored credential. Ex) passman %s serviceName\n", GET_CREDENTIAL, GET_CREDENTIAL)
+	fmt.Printf("\t%s\t\tDeletes a stored credential. Ex) passman %s service_name\n", RM_CREDENTIAL, RM_CREDENTIAL)
+	fmt.Printf("\t%s\t\tDeletes ALL credentials saved under you active account. Ex) passman %s\n", NUKE_ACCOUNT, NUKE_ACCOUNT)
 	fmt.Printf("\t%s\t\tAuthenticate a passman session good for 30 minutes\n", LOGIN)
-	fmt.Printf("\t%s\t\tGenerates a crypto random string to be used for a secure password\n", GEN_PASS)
+	fmt.Printf("\t%s\t\tGenerates a crypto random string. Ex) passman rand 16\n", GEN_PASS)
 	fmt.Printf("\t%s\t\tDisplays this message\n", HELP)
 	fmt.Printf("\t%s\t\tDisplays the version of passman\n", VERSION)
 }
@@ -120,7 +119,7 @@ func main() {
 	passmanHome = usr.HomeDir + "/.passman/session.json"
 
 	if os.Getenv(PASSMAN_MASTER) == "" {
-		log.Println("No PASSMAN_MASTER environment vairable set")
+		log.Printf("No %s environment vairable set\n", PASSMAN_MASTER)
 		return
 	}
 
@@ -132,13 +131,13 @@ func main() {
 	actions[GEN_PASS] = genPassword
 	// API calls
 	actions[LOGIN] = signin
-	actions[CREATE_ACCOUNT] = register
-	actions[DELETE_ACCOUNT] = deleteAccount
-	actions[ADD_CRED] = addCredential
-	actions[GET_CRED] = getCredential
-	actions[DELETE_CRED] = deleteCredential
-	actions[SERVICES] = getServices
-	actions[UPDATE] = update
+	actions[REGISTER_ACCOUNT] = register
+	actions[NUKE_ACCOUNT] = nuke
+	actions[INSERT_CREDENTIAL] = insert
+	actions[GET_CREDENTIAL] = get
+	actions[RM_CREDENTIAL] = rm
+	actions[GET_SERVICES] = services
+	actions[UPDATE_CREDENTIAL] = update
 
 	if len(argsWithoutProg) == 0 {
 		log.Println("No action specified")
@@ -150,9 +149,9 @@ func main() {
 		os.Create(passmanHome)
 	}
 
-	f, ok := actions[argsWithoutProg[0]]
+	action, ok := actions[argsWithoutProg[0]]
 	if ok {
-		f()
+		action()
 	} else {
 		log.Println("Invalid action specified")
 		help()
@@ -171,8 +170,8 @@ func main() {
 // }
 
 func signin() {
-	if len(argsWithoutProg) < 2 {
-		log.Println("No account email specified")
+	if len(argsWithoutProg) != 2 {
+		log.Println("No account specified")
 		return
 	}
 
@@ -181,7 +180,6 @@ func signin() {
 
 	var payload = `{"email":"%s","password":"%s","returnSecureToken": true}`
 	payload = fmt.Sprintf(payload, username, password)
-	// fmt.Println(payload)
 	req, err := http.NewRequest("GET", urlAuthUser, strings.NewReader(payload))
 
 	if err != nil {
@@ -208,14 +206,13 @@ func signin() {
 		return
 	}
 
+	log.Println("Login OK")
+
 	err = ioutil.WriteFile(passmanHome, body, 0644)
 
 	if err != nil {
 		log.Println(err.Error())
-		return
 	}
-
-	log.Println("Login OK")
 }
 
 func cleanInput(s string) string {
@@ -246,17 +243,15 @@ func genPassword() {
 	data := [][]string{
 		[]string{n},
 	}
-
 	table := tablewriter.NewWriter(os.Stdout)
 	table.SetHeader([]string{"New Password"})
-
 	for _, v := range data {
 		table.Append(v)
 	}
-	table.Render() // Send output
+	table.Render()
 }
 
-func deleteAccount() {
+func nuke() {
 
 	tokenData, err := getUserStore()
 
@@ -272,6 +267,7 @@ func deleteAccount() {
 		log.Println(err.Error())
 		return
 	}
+
 	log.Println("!!! WARNING !!!")
 	log.Println("Are you sure you want to delete ALL data associaed with:", storedJWT.Email)
 	log.Println("Type: 'yes' to remove all data")
@@ -289,12 +285,12 @@ func deleteAccount() {
 	// req, err := http.NewRequest("GET", urlAuthUser, strings.NewReader(payload))
 	// fmt.Println(payload)
 	req, err := http.NewRequest("DELETE", urlDeleteUser, strings.NewReader(payload))
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", storedJWT.IDToken))
 
 	if err != nil {
 		log.Println(err.Error())
 	}
 
-	// req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", storedJWT.IDToken))
 	res, err := http.DefaultClient.Do(req)
 
 	if err != nil {
@@ -355,9 +351,7 @@ func register() {
 	json.Unmarshal(body, &id)
 
 	payloadVerifyAccount := fmt.Sprintf(`{"requestType": "VERIFY_EMAIL","idToken": "%s"}`, id.IdToken)
-
 	req, err = http.NewRequest("POST", urlVerifyAccount, strings.NewReader(payloadVerifyAccount))
-
 	res, err = http.DefaultClient.Do(req)
 
 	if err != nil {
@@ -370,9 +364,9 @@ func register() {
 	log.Println("Account created OK")
 }
 
-func addCredential() {
-	if len(argsWithoutProg) < 4 {
-		log.Println("No service name")
+func insert() {
+	if len(argsWithoutProg) != 4 {
+		log.Println("Not enough args")
 		return
 	}
 
@@ -394,22 +388,6 @@ func addCredential() {
 	}
 
 	username, password := argsWithoutProg[2], argsWithoutProg[3]
-	fmt.Print("Confirm: ")
-
-	// bytePasswordConfirm, err := terminal.ReadPassword(int(os.Stdin.Fd()))
-
-	// if err != nil {
-	// 	fmt.Println(err.Error())
-	// 	return
-	// }
-
-	// passwordConfirm := cleanInput(string(bytePasswordConfirm))
-	// fmt.Println()
-
-	// if password != passwordConfirm {
-	// 	fmt.Println("Passwords do not match")
-	// 	return
-	// }
 
 	password = encrypt([]byte(password), os.Getenv(PASSMAN_MASTER))
 	username = encrypt([]byte(username), os.Getenv(PASSMAN_MASTER))
@@ -441,6 +419,7 @@ func addCredential() {
 
 	if res.StatusCode != 200 {
 		log.Println(string(body))
+		log.Println("Try logging in again")
 		return
 	}
 
@@ -448,8 +427,8 @@ func addCredential() {
 }
 
 func update() {
-	if len(argsWithoutProg) < 3 {
-		log.Println("No service name")
+	if len(argsWithoutProg) != 3 {
+		log.Println("Not enough args")
 		return
 	}
 
@@ -471,26 +450,7 @@ func update() {
 	}
 
 	username, password := argsWithoutProg[1], argsWithoutProg[2]
-	// fmt.Print("Confirm: ")
-
-	// bytePasswordConfirm, err := terminal.ReadPassword(int(os.Stdin.Fd()))
-
-	// if err != nil {
-	// 	fmt.Println(err.Error())
-	// 	return
-	// }
-
-	// passwordConfirm := cleanInput(string(bytePasswordConfirm))
-	// fmt.Println()
-
-	// if password != passwordConfirm {
-	// 	fmt.Println("Passwords do not match")
-	// 	return
-	// }
-
 	password = encrypt([]byte(password), os.Getenv(PASSMAN_MASTER))
-	// username = encrypt([]byte(username), os.Getenv(PASSMAN_MASTER))
-	// serviceName = argsWithoutProg[1]
 	newCredentialPayload = fmt.Sprintf(newCredentialPayload, username, password)
 	req, err := http.NewRequest("POST", urlUpdateCredential, strings.NewReader(newCredentialPayload))
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", storedJWT.IDToken))
@@ -524,7 +484,7 @@ func update() {
 	log.Println("Credential updated OK")
 }
 
-func getCredential() {
+func get() {
 	if len(argsWithoutProg) < 2 {
 		log.Println("No service name")
 		return
@@ -611,13 +571,8 @@ func getCredential() {
 	table.Render() // Send output
 }
 
-func getServices() {
-	// if len(argsWithoutProg) < 2 {
-	// 	log.Println("No service name")
-	// 	return
-	// }
+func services() {
 
-	// serviceName := ""
 	tokenData, err := getUserStore()
 
 	if err != nil {
@@ -632,7 +587,6 @@ func getServices() {
 		log.Println(err.Error())
 	}
 
-	// serviceName = argsWithoutProg[1]
 	req, err := http.NewRequest("GET", urlServices+"/", nil)
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", storedJWT.IDToken))
 
@@ -671,109 +625,26 @@ func getServices() {
 		log.Println(err.Error())
 		return
 	}
-	fmt.Println(credentialRecord)
 
-	// sDec, err := b64.StdEncoding.DecodeString(credentialRecord.Password)
-	// uName, _ := b64.StdEncoding.DecodeString(credentialRecord.Username)
+	data := [][]string{}
+	for i := range credentialRecord {
+		data = append(data, []string{credentialRecord[i].ServiceName})
+	}
 
-	// if err != nil {
-	// 	log.Println(err.Error())
-	// 	return
-	// }
-
-	// credentialRecord.Password = string(decrypt([]byte(sDec), os.Getenv(PASSMAN_MASTER)))
-	// credentialRecord.Username = string(decrypt([]byte(uName), os.Getenv(PASSMAN_MASTER)))
-
-	// data := [][]string{
-	// 	[]string{credentialRecord.ServiceName, credentialRecord.Username, credentialRecord.Password},
-	// }
-
-	// table := tablewriter.NewWriter(os.Stdout)
-	// table.SetHeader([]string{"service name", "username", "password"})
-
-	// for _, v := range data {
-	// 	table.Append(v)
-	// }
-	// table.Render() // Send output
+	table := tablewriter.NewWriter(os.Stdout)
+	table.SetHeader([]string{"Service"})
+	for _, v := range data {
+		table.Append(v)
+	}
+	table.Render()
 }
 
-// func getCredentials() {
-// 	tokenData, err := getUserStore()
-
-// 	if err != nil {
-// 		log.Println(err.Error())
-// 		return
-// 	}
-
-// 	var storedJWT FirebaseStruct
-// 	err = json.Unmarshal(tokenData, &storedJWT)
-
-// 	if err != nil {
-// 		log.Println(err.Error())
-// 	}
-
-// 	req, err := http.NewRequest("GET", urlNewCredential+"s", nil)
-// 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", storedJWT.IDToken))
-
-// 	if err != nil {
-// 		log.Println(err.Error())
-// 		return
-// 	}
-
-// 	res, err := http.DefaultClient.Do(req)
-
-// 	if err != nil {
-// 		log.Println(err.Error())
-// 		return
-// 	}
-
-// 	body, _ := ioutil.ReadAll(res.Body)
-
-// 	if err != nil {
-// 		log.Println(err.Error())
-// 	}
-
-// 	defer res.Body.Close()
-
-// 	if res.StatusCode != 200 {
-// 		log.Println(string(body))
-// 		return
-// 	}
-
-// 	var credentialRecord = []struct {
-// 		ServiceName string
-// 		Username    string
-// 		Password    string
-// 	}{}
-
-// 	err = json.Unmarshal(body, &credentialRecord)
-
-// 	if err != nil {
-// 		log.Println(err.Error())
-// 		return
-// 	}
-
-// 	for i := 0; i < len(credentialRecord); i++ {
-// 		sDec, err := b64.StdEncoding.DecodeString(credentialRecord[i].Password)
-
-// 		if err != nil {
-// 			log.Println(err.Error())
-// 			return
-// 		}
-
-// 		credentialRecord[i].Password = string(decrypt([]byte(sDec), os.Getenv(PASSMAN_MASTER)))
-// 	}
-
-// 	log.Println("Credential retreived OK:", credentialRecord)
-// }
-
-func deleteCredential() {
-	if len(argsWithoutProg) < 2 {
-		log.Println("No service name")
+func rm() {
+	if len(argsWithoutProg) != 2 {
+		log.Println("Not enough arguments")
 		return
 	}
 
-	serviceName := ""
 	tokenData, err := getUserStore()
 
 	if err != nil {
@@ -788,7 +659,7 @@ func deleteCredential() {
 		log.Println(err.Error())
 	}
 
-	serviceName = argsWithoutProg[1]
+	serviceName := argsWithoutProg[1]
 	req, err := http.NewRequest("DELETE", urlNewCredential+"/"+serviceName, nil)
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", storedJWT.IDToken))
 
@@ -816,30 +687,9 @@ func deleteCredential() {
 		log.Println(string(body))
 		return
 	}
-
-	// var credentialRecord = struct {
-	// 	ServiceName string
-	// 	Username    string
-	// 	Password    string
-	// }{}
-
-	// err = json.Unmarshal(body, &credentialRecord)
-
-	// if err != nil {
-	// 	log.Println(err.Error())
-	// 	return
-	// }
-
-	// sDec, err := b64.StdEncoding.DecodeString(credentialRecord.Password)
-
-	// if err != nil {
-	// 	log.Println(err.Error())
-	// 	return
-	// }
-
-	// credentialRecord.Password = string(decrypt([]byte(sDec), os.Getenv(PASSMAN_MASTER)))
-	log.Println("Credential deleted OK:", string(body))
+	log.Println("Credential deleted OK:")
 }
+
 func encrypt(data []byte, passphrase string) string {
 	block, _ := aes.NewCipher([]byte(createHash(passphrase)))
 	gcm, err := cipher.NewGCM(block)

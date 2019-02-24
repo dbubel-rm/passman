@@ -24,7 +24,7 @@ func DeleteCredentialDB(dbConn *sqlx.DB, serviceName string, localID interface{}
 }
 
 func UpdateCredentialDB(dbConn *sqlx.DB, serviceName, password string, localID interface{}) error {
-	_, err := dbConn.Exec(`UPDATE credentials SET password = ? WHERE service_name = ? AND local_id = ?`,
+	_, err := dbConn.Exec(`UPDATE credentials SET password = ?, updated_at = NOW() WHERE service_name = ? AND local_id = ?`,
 		password, serviceName, localID)
 	return err
 }
@@ -33,4 +33,10 @@ func GetServicesDB(dbConn *sqlx.DB, localID interface{}) (*[]Service, error) {
 	var serviceList []Service
 	err := dbConn.Select(&serviceList, `SELECT service_name FROM credentials WHERE local_id = ?`, localID)
 	return &serviceList, err
+}
+
+func DeleteAccountDB(dbConn *sqlx.DB, localID interface{}) error {
+	_, err := dbConn.Exec(`DELETE FROM credentials WHERE local_id = ?`,
+		localID)
+	return err
 }

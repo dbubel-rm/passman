@@ -6,8 +6,10 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/dbubel/passman/internal/credentials"
 	"github.com/dbubel/passman/internal/firebase"
 	"github.com/dbubel/passman/internal/platform/web"
+	"github.com/jmoiron/sqlx"
 	"github.com/julienschmidt/httprouter"
 )
 
@@ -16,6 +18,7 @@ type Firebase struct {
 	CreateURL string
 	DeleteURL string
 	VerifyURL string
+	MasterDB  *sqlx.DB
 }
 
 // Signin - Get a valid JWT for the user
@@ -127,6 +130,7 @@ func (f *Firebase) Delete(log *log.Logger, w http.ResponseWriter, r *http.Reques
 		return err
 	}
 
+	credentials.DeleteAccountDB(f.MasterDB, r.Context().Value("localId"))
 	web.Respond(log, w, firebaseResp, res.StatusCode)
 	return nil
 }
