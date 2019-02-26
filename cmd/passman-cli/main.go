@@ -35,7 +35,7 @@ type FirebaseStruct struct {
 	PassmanPayload string `json:"passmanPayload"`
 }
 
-var baseUrl = "http://localhost:3000"
+var baseUrl = "http://passman-server-alb-1386890322.us-east-1.elb.amazonaws.com"
 
 var urlCreateAccount = baseUrl + "/v1/users"
 var urlDeleteUser = baseUrl + "/v1/users"
@@ -58,7 +58,6 @@ const (
 	LOGIN             = "login"
 	PASSMAN_MASTER    = "PASSMAN_MASTER"
 	GET_CREDENTIAL    = "get"
-	// GET_CREDS      = "get:credentials"
 	RM_CREDENTIAL     = "rm"
 	GET_SERVICES      = "services"
 	UPDATE_CREDENTIAL = "update"
@@ -66,7 +65,6 @@ const (
 
 func version() {
 	fmt.Println("v0.0.1")
-
 }
 
 func generateRandomBytes(n int) ([]byte, error) {
@@ -252,9 +250,7 @@ func genPassword() {
 }
 
 func nuke() {
-
 	tokenData, err := getUserStore()
-
 	if err != nil {
 		log.Println(err.Error())
 		return
@@ -282,8 +278,6 @@ func nuke() {
 	var payload = `{"idToken":"%s"}`
 	payload = fmt.Sprintf(payload, storedJWT.IDToken)
 
-	// req, err := http.NewRequest("GET", urlAuthUser, strings.NewReader(payload))
-	// fmt.Println(payload)
 	req, err := http.NewRequest("DELETE", urlDeleteUser, strings.NewReader(payload))
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", storedJWT.IDToken))
 
@@ -365,7 +359,7 @@ func register() {
 }
 
 func insert() {
-	if len(argsWithoutProg) != 4 {
+	if len(argsWithoutProg) != 5 {
 		log.Println("Not enough args")
 		return
 	}
@@ -408,7 +402,7 @@ func insert() {
 		return
 	}
 
-	body, _ := ioutil.ReadAll(res.Body)
+	body, err := ioutil.ReadAll(res.Body)
 
 	if err != nil {
 		log.Println(err.Error())
@@ -485,7 +479,7 @@ func update() {
 }
 
 func get() {
-	if len(argsWithoutProg) < 2 {
+	if len(argsWithoutProg) != 2 {
 		log.Println("No service name")
 		return
 	}
@@ -572,7 +566,6 @@ func get() {
 }
 
 func services() {
-
 	tokenData, err := getUserStore()
 
 	if err != nil {
@@ -693,17 +686,13 @@ func rm() {
 func encrypt(data []byte, passphrase string) string {
 	block, _ := aes.NewCipher([]byte(createHash(passphrase)))
 	gcm, err := cipher.NewGCM(block)
-
 	if err != nil {
 		panic(err.Error())
 	}
-
 	nonce := make([]byte, gcm.NonceSize())
-
 	if _, err = io.ReadFull(rand.Reader, nonce); err != nil {
 		panic(err.Error())
 	}
-
 	ciphertext := gcm.Seal(nonce, nonce, data, nil)
 	sEnc := b64.StdEncoding.EncodeToString([]byte(ciphertext))
 	return sEnc
@@ -718,25 +707,19 @@ func createHash(key string) string {
 func decrypt(data []byte, passphrase string) []byte {
 	key := []byte(createHash(passphrase))
 	block, err := aes.NewCipher(key)
-
 	if err != nil {
 		panic(err.Error())
 	}
-
 	gcm, err := cipher.NewGCM(block)
-
 	if err != nil {
 		panic(err.Error())
 	}
-
 	nonceSize := gcm.NonceSize()
 	nonce, ciphertext := data[:nonceSize], data[nonceSize:]
 	plaintext, err := gcm.Open(nil, nonce, ciphertext, nil)
-
 	if err != nil {
 		panic(err.Error())
 	}
-
 	return plaintext
 }
 

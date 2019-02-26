@@ -56,7 +56,7 @@ resource "aws_alb_target_group" "alb_target_group" {
   }
 
   health_check {
-    path = "/health"
+    path = "/v1/health"
   }
 }
 

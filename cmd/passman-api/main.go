@@ -25,14 +25,14 @@ func main() {
 
 	var cfg struct {
 		Web struct {
-			APIHost         string        `default:":3000" envconfig:"API_HOST"`
+			APIHost         string        `default:":80" envconfig:"API_HOST"`
 			DebugHost       string        `default:":4000" envconfig:"DEBUG_HOST"`
 			ReadTimeout     time.Duration `default:"5s" envconfig:"READ_TIMEOUT"`
 			WriteTimeout    time.Duration `default:"5s" envconfig:"WRITE_TIMEOUT"`
 			ShutdownTimeout time.Duration `default:"5s" envconfig:"SHUTDOWN_TIMEOUT"`
 		}
 		DB struct {
-			Host string `default:"root@tcp(127.0.0.1:3306)/passman" envconfig:"DB_HOST"`
+			Host string `default:"root@tcp(db:3306)/passman" envconfig:"DB_HOST"`
 		}
 	}
 
@@ -44,11 +44,18 @@ func main() {
 	// Start MySQL
 
 	log.Println("main : Started : Initialize MySQL")
-	masterDB, err := db.New(cfg.DB.Host)
-	if err != nil {
-		log.Fatalf("main : Register DB : %v", err)
-	} else {
-		log.Println("DB connect OK")
+	var err error
+	var masterDB *db.MySQLDB
+	for i := 0; i < 20; i++ {
+
+		masterDB, err = db.New(cfg.DB.Host)
+		if err != nil {
+			log.Println("main : Register DB : %v", err)
+		} else {
+			log.Println("DB connect OK")
+			break
+		}
+		time.Sleep(time.Second)
 	}
 	defer masterDB.Close()
 
@@ -100,7 +107,6 @@ func main() {
 	// 	log.Printf("Debug Listening %s", cfg.Web.DebugHost)
 	// 	log.Printf("Debug Listener closed : %v", debug.ListenAndServe())
 	// }()
-	
 
 	// Shutdown
 

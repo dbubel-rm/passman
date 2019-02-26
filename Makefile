@@ -9,5 +9,9 @@ build:
 	
 test:
 	docker-compose -f docker-compose.yaml up --build --abort-on-container-exit 
+run:
+	docker-compose -f docker-compose.prod.yaml up --build -d
+stop:
+	docker-compose -f docker-compose.prod.yaml down
 
 .PHONY: build

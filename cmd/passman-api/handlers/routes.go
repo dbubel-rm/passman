@@ -18,7 +18,7 @@ func API(log *log.Logger, db *db.MySQLDB, auth web.Middleware) http.Handler {
 		MasterDB: db.Database,
 	}
 
-	app.Handle("GET", "/v1/health", check.Health)
+	app.Handle("GET", "/health", check.Health)
 
 	var apiKey = "AIzaSyBItfzjx74wXWCet-ARldNNpKIZVR1PQ5I%0A"
 	var firebaseBaseURL = "https://www.googleapis.com/identitytoolkit/v3/relyingparty"

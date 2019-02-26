@@ -1,5 +1,5 @@
 locals {
-  staging_availability_zones = ["us-east-1a"]
+  staging_availability_zones = ["us-east-1a", "us-east-1b"]
 }
 
 provider "aws" {
@@ -22,17 +22,17 @@ module "network_basic" {
   key_name             = "${var.key_name}"
 }
 
-# module "rds" {
-#   source            = "../modules/rds"
-#   environment       = "staging"
-#   allocated_storage = "20"
-#   database_name     = "${var.staging_database_name}"
-#   database_username = "${var.staging_database_username}"
-#   database_password = "${var.staging_database_password}"
-#   subnet_ids        = ["${module.networking.private_subnets_id}"]
-#   vpc_id            = "${module.networking.vpc_id}"
-#   instance_class    = "db.t2.micro"
-# }
+module "rds" {
+  source            = "../modules/rds"
+  environment       = "staging"
+  allocated_storage = "20"
+  database_name     = "${var.staging_database_name}"
+  database_username = "${var.staging_database_username}"
+  database_password = "${var.staging_database_password}"
+  subnet_ids        = ["${module.network_basic.private_subnets_id}"]
+  vpc_id            = "${module.network_basic.vpc_id}"
+  instance_class    = "db.t2.micro"
+}
 
 module "bastion" {
   region      = "${var.region}"
