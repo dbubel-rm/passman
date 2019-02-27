@@ -1,4 +1,4 @@
-FROM golang:alpine
+FROM golang:latest
 RUN mkdir -p /go/src/github.com/dbubel/passman
 ADD . /go/src/github.com/dbubel/passman
 WORKDIR /go/src/github.com/dbubel/passman/cmd/passman-api
