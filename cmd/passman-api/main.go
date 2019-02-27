@@ -32,7 +32,7 @@ func main() {
 			ShutdownTimeout time.Duration `default:"5s" envconfig:"SHUTDOWN_TIMEOUT"`
 		}
 		DB struct {
-			Host string `default:"root@tcp(db:3306)/passman" envconfig:"DB_HOST"`
+			Host string `default:"passman:Hisiyep97@tcp(passman-db.cfneifgjtyib.us-east-1.rds.amazonaws.com:3306)/passman" envconfig:"DB_HOST"`
 		}
 	}
 

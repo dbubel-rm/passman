@@ -1,0 +1,26 @@
+version: '2'
+
+services:
+  db:
+    build:
+      context: .
+      dockerfile: Dockerfile.passman.db
+    environment:
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+      MYSQL_DATABASE: "passman"
+      MYSQL_ROOT_HOST: "%"
+
+  api:
+    depends_on:
+      - db
+    build:
+      context: .
+      dockerfile: Dockerfile.passman.api.prod
+    environment:
+      ENV_NAME: test
+      DSN: root@tcp(db:3306)/passman
+      REDIS: redis:6379
+    ports:
+      - "4000:80"
+    
+
