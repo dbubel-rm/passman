@@ -7,6 +7,8 @@ import (
 	"log"
 	"net/http"
 	"net/http/httptest"
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 	"time"
@@ -32,8 +34,12 @@ func init() {
 	f = mid.FakeAuth
 	l = log.New(ioutil.Discard, "", log.LstdFlags|log.Lmicroseconds|log.Lshortfile)
 	var err error
+	var dsn = "root@tcp(db:3306)/passman"
+	if os.Getenv("DB_HOST") != "" {
+		dsn = os.Getenv("DB_HOST")
+	}
 	for i := 0; i < 20; i++ {
-		d, err = db.New("root@tcp(db:3306)/passman")
+		d, err = db.New(dsn)
 		if err != nil {
 			log.Printf("\t%s DB connection error: %s", Failed, err.Error())
 			time.Sleep(time.Second)
@@ -43,16 +49,15 @@ func init() {
 		break
 	}
 
-	// fixtureFiles, err := filepath.Glob("../../../*.sql")
+	fixtureFiles, err := filepath.Glob("../../../*.sql")
 
-	// fmt.Println(pwd)
-	// fmt.Println("fixtures", fixtureFiles)
+	fmt.Println("fixtures", fixtureFiles)
 
-	// sql, err := ioutil.ReadFile(fixtureFiles[0])
-	// fmt.Println(string(sql))
-	// if err != nil {
-	// 	panic(err)
-	// }
+	sql, err := ioutil.ReadFile(fixtureFiles[0])
+	fmt.Println(string(sql))
+	if err != nil {
+		panic(err)
+	}
 
 	_, err = d.Database.Exec("truncate table credentials")
 	if err != nil {

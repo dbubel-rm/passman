@@ -25,14 +25,14 @@ func main() {
 
 	var cfg struct {
 		Web struct {
-			APIHost         string        `default:":80" envconfig:"API_HOST"`
+			APIHost         string        `default:":3000" envconfig:"API_HOST"`
 			DebugHost       string        `default:":4000" envconfig:"DEBUG_HOST"`
 			ReadTimeout     time.Duration `default:"5s" envconfig:"READ_TIMEOUT"`
 			WriteTimeout    time.Duration `default:"5s" envconfig:"WRITE_TIMEOUT"`
 			ShutdownTimeout time.Duration `default:"5s" envconfig:"SHUTDOWN_TIMEOUT"`
 		}
 		DB struct {
-			Host string `default:"passman:Hisiyep97@tcp(passman-db.cfneifgjtyib.us-east-1.rds.amazonaws.com:3306)/passman" envconfig:"DB_HOST"`
+			Host string `default:"root@tcp(db:3306)/passman" envconfig:"DB_HOST"`
 		}
 	}
 
@@ -50,7 +50,7 @@ func main() {
 
 		masterDB, err = db.New(cfg.DB.Host)
 		if err != nil {
-			log.Println("main : Register DB : %v", err)
+			log.Printf("main : Register DB : %s\n", err.Error())
 		} else {
 			log.Println("DB connect OK")
 			break
