@@ -59,7 +59,7 @@ func init() {
 	if err != nil {
 		panic(err)
 	}
-
+	_, err = d.Database.Exec(string(sql))
 	_, err = d.Database.Exec("truncate table credentials")
 	if err != nil {
 		fmt.Println(err.Error())
