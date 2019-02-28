@@ -10,6 +10,7 @@ build:
 test:
 	docker-compose -f docker-compose.yaml up --build --abort-on-container-exit 
 test-local:
+	mysql -u root -e "create database if not exists passman;"
 	cd cmd/passman-api/ && DB_HOST="root@tcp(127.0.0.1:3306)/passman" go test -v ./...
 run:
 	docker-compose -f docker-compose.prod.yaml up --build -d
