@@ -41,6 +41,7 @@ func init() {
 	for i := 0; i < 20; i++ {
 		d, err = db.New(dsn)
 		if err != nil {
+			log.Println(dsn)
 			log.Printf("\t%s DB connection error: %s", Failed, err.Error())
 			time.Sleep(time.Second)
 			continue

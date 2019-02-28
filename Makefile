@@ -10,7 +10,7 @@ build:
 test:
 	docker-compose -f docker-compose.yaml up --build --abort-on-container-exit 
 test-local:
-	cd cmd/passman-api/ && DB_HOST="root:my-secret-pw@tcp(localhost:3306)/passman" go test -v ./...
+	cd cmd/passman-api/ && DB_HOST="root@tcp(127.0.0.1:3306)/passman" go test -v ./...
 run:
 	docker-compose -f docker-compose.prod.yaml up --build -d
 stop:
