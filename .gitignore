@@ -17,3 +17,5 @@
 *.tfstate.*
 crash.log
 *.tfvars
+production_key
+.pub

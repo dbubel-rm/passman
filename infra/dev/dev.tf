@@ -55,7 +55,7 @@ module "bastion" {
 
   security_group_ids = [
     "${module.network_public_subnets.bastion}",
-    # "${module.rds.db_access_sg_id}",
+    "${module.rds.db_access_sg_id}",
   ]
 
   public_subnet_ids = ["${module.network_public_subnets.public_subnet}"]
