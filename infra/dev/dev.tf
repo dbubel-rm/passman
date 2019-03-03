@@ -8,7 +8,7 @@ provider "aws" {
 
 resource "aws_key_pair" "key" {
   key_name   = "${var.key_name}"
-  public_key = "${file("production_key.pub")}"
+  public_key = "${file("keys/production_key.pub")}"
 }
 
 module "network_public_subnets" {
@@ -35,17 +35,32 @@ module "rds" {
   instance_class    = "db.t2.micro"
 }
 
-# module "rds" {
-#   source            = "../modules/rds"
-#   environment       = "staging"
-#   allocated_storage = "20"
-#   database_name     = "${var.staging_database_name}"
-#   database_username = "${var.staging_database_username}"
-#   database_password = "${var.staging_database_password}"
-#   subnet_ids        = ["${module.network_basic.private_subnets_id}"]
-#   vpc_id            = "${module.network_basic.vpc_id}"
-#   instance_class    = "db.t2.micro"
-# }
+
+module "ecs" {
+  source      = "../modules/ecs"
+  environment = "${var.environment}"
+  vpc_id      = "${module.network_public_subnets.vpc_id}"
+
+  # mysql_endpoint = "https://dynamodb.${var.region}.amazonaws.com"
+  region = "${var.region}"
+
+  # public_subnet_ids  = ["${module.network_public_subnets.public_subnets_id}"]
+  public_subnet_ids = ["${module.network_public_subnets.public_subnet}"]
+
+  # security_group_ids = ["${module.networking.default_sg_id}"]
+
+  security_group_ids = [
+    "${module.network_public_subnets.security_groups_ids}",
+    "${module.rds.db_access_sg_id}",
+  ]
+  mysql_endpoint = "${module.rds.rds_address}"
+
+  # database_name       = "${var.production_database_name}"
+  # database_username   = "${var.production_database_username}"
+  # database_password   = "${var.production_database_password}"
+  # secret_key_base     = "${var.production_secret_key_base}"
+}
+
 
 module "bastion" {
   region      = "${var.region}"

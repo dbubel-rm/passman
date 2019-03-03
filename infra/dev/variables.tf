@@ -19,7 +19,7 @@ variable "domain" {
 }
 
 variable "environment" {
-  default = "passman-staging"
+  default = "dev"
 }
 
 variable "key_name" {

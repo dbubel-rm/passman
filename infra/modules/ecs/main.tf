@@ -157,7 +157,7 @@ resource "aws_ecs_service" "app" {
 
   network_configuration {
     security_groups = ["${var.security_group_ids}", "${aws_security_group.ecs_service.id}"]
-    subnets         = ["${var.private_subnet_ids}"]
+    subnets         = ["${var.public_subnet_ids}"]
   }
 
   load_balancer {

@@ -23,10 +23,10 @@ variable "public_subnet_ids" {
   description = "The public subnet IDs"
 }
 
-variable "private_subnet_ids" {
-  type        = "list"
-  description = "The private subnet IDs"
-}
+# variable "private_subnet_ids" {
+#   type        = "list"
+#   description = "The private subnet IDs"
+# }
 
 variable "security_group_ids" {
   type        = "list"
