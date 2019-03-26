@@ -8,7 +8,7 @@ provider "aws" {
 
 resource "aws_key_pair" "key" {
   key_name   = "${var.key_name}"
-  public_key = "${file("production_key.pub")}"
+  public_key = "${file("bastion_key.pub")}"
 }
 
 module "networking" {
