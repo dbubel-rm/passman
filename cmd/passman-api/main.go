@@ -25,14 +25,14 @@ func main() {
 
 	var cfg struct {
 		Web struct {
-			APIHost         string        `default:":3000" envconfig:"API_HOST"`
+			APIHost         string        `default:":3000" envconfig:"PORT"`
 			DebugHost       string        `default:":4000" envconfig:"DEBUG_HOST"`
 			ReadTimeout     time.Duration `default:"5s" envconfig:"READ_TIMEOUT"`
 			WriteTimeout    time.Duration `default:"5s" envconfig:"WRITE_TIMEOUT"`
 			ShutdownTimeout time.Duration `default:"5s" envconfig:"SHUTDOWN_TIMEOUT"`
 		}
 		DB struct {
-			Host string `default:"root@tcp(db:3306)/passman" envconfig:"DB_HOST"`
+			Host string `default:"root@tcp(db:3306)/passman" envconfig:"MYSQL_ENDPOINT"`
 		}
 	}
 
