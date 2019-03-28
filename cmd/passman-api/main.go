@@ -18,7 +18,7 @@ import (
 	"github.com/kelseyhightower/envconfig"
 )
 
-var build = "develop"
+var build = "develop-4"
 
 func main() {
 	log := log.New(os.Stdout, "", log.LstdFlags|log.Lmicroseconds|log.Lshortfile)
@@ -32,7 +32,9 @@ func main() {
 			ShutdownTimeout time.Duration `default:"5s" envconfig:"SHUTDOWN_TIMEOUT"`
 		}
 		DB struct {
-			Host string `default:"root@tcp(db:3306)/passman" envconfig:"MYSQL_ENDPOINT"`
+			Host string `default:"passman:1shadow1@tcp(passman-db.cfneifgjtyib.us-east-1.rds.amazonaws.com:3306)/passman" envconfig:"MYSQL_ENDPOINT"`, 
+			Username string`default:"passman" envconfig:"MYSQL_USERNAME"`,
+			Password string`default:"" envconfig:"MYSQL_PASSWORD"`,
 		}
 	}
 
@@ -43,11 +45,11 @@ func main() {
 	// =========================================================================
 	// Start MySQL
 
-	log.Println("main : Started : Initialize MySQL")
+	log.Println("main : Started : Initialize MySQL", build)
 	var err error
 	var masterDB *db.MySQLDB
+	connStr := fmt.Sprintf("%s:%s@tcp()")
 	for i := 0; i < 20; i++ {
-
 		masterDB, err = db.New(cfg.DB.Host)
 		if err != nil {
 			log.Printf("main : Register DB : %s\n", err.Error())

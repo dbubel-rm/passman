@@ -23,10 +23,10 @@ func (c *Check) Health(log *log.Logger, w http.ResponseWriter, r *http.Request, 
 		Status: "ok",
 	}
 
-	err := c.MasterDB.Ping()
-	if err != nil {
-		web.RespondError(log, w, err, http.StatusInternalServerError)
-	}
+	// err := c.MasterDB.Ping()
+	// if err != nil {
+	// 	web.RespondError(log, w, err, http.StatusInternalServerError)
+	// }
 
 	web.Respond(log, w, status, http.StatusOK)
 	return nil
