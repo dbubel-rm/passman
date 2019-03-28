@@ -32,7 +32,7 @@ data "template_file" "passman_server_task" {
 }
 
 resource "aws_ecs_task_definition" "passman_server" {
-  family                   = "${var.environment}_passman-server"
+  family                   = "${var.environment}-passman-server"
   container_definitions    = "${data.template_file.passman_server_task.rendered}"
   requires_compatibilities = ["FARGATE"]
   network_mode             = "awsvpc"

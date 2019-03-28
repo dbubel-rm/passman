@@ -1,6 +1,6 @@
 [
     {
-      "name": "passman-production-app",
+      "name": "production-app",
       "image": "${image}",
       "memory": 256,
       "portMappings": [

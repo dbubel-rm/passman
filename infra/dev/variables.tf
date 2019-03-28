@@ -18,12 +18,12 @@ variable "production_database_password" {
   default = "alkjswerfwere392kd"
 }
 
-variable "domain" {
-  default = "The domain of your application"
-}
+# variable "domain" {
+#   default = "The domain of your application"
+# }
 
 variable "environment" {
-  default = "dev"
+  default = "production"
 }
 
 variable "key_name" {

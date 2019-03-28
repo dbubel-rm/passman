@@ -28,22 +28,22 @@ resource "aws_internet_gateway" "ig" {
 
 
 /* Elastic IP for NAT */
-# resource "aws_eip" "nat_eip" {
-#   vpc        = true
-#   depends_on = ["aws_internet_gateway.ig"]
-# }
+resource "aws_eip" "nat_eip" {
+  vpc        = true
+  depends_on = ["aws_internet_gateway.ig"]
+}
 
 /* NAT */
-# resource "aws_nat_gateway" "nat" {
-#   allocation_id = "${aws_eip.nat_eip.id}"
-#   subnet_id     = "${element(aws_subnet.public_subnet.*.id, 0)}"
-#   depends_on    = ["aws_internet_gateway.ig"]
+resource "aws_nat_gateway" "nat" {
+  allocation_id = "${aws_eip.nat_eip.id}"
+  subnet_id     = "${element(aws_subnet.public_subnet.*.id, 0)}"
+  depends_on    = ["aws_internet_gateway.ig"]
 
-#   tags {
-#     Name        = "${var.environment}-${element(var.availability_zones, count.index)}-nat"
-#     Environment = "${var.environment}"
-#   }
-# }
+  tags {
+    Name        = "${var.environment}-${element(var.availability_zones, count.index)}-nat"
+    Environment = "${var.environment}"
+  }
+}
 
 /* Public subnet */
 resource "aws_subnet" "public_subnet" {
@@ -145,17 +145,17 @@ resource "aws_route_table_association" "public" {
 # }
 
 
-# /* Routing table for private subnet */
-# resource "aws_route_table" "private" {
-#   vpc_id = "${aws_vpc.vpc.id}"
+/* Routing table for private subnet */
+resource "aws_route_table" "private" {
+  vpc_id = "${aws_vpc.vpc.id}"
 
-#   tags {
-#     Name        = "${var.environment}-private-route-table"
-#     Environment = "${var.environment}"
-#   }
-# }
+  tags {
+    Name        = "${var.environment}-private-route-table"
+    Environment = "${var.environment}"
+  }
+}
 
-# /* Routing table for public subnet */
+/* Routing table for public subnet */
 # resource "aws_route_table" "public" {
 #   vpc_id = "${aws_vpc.vpc.id}"
 
