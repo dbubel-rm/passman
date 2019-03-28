@@ -32,7 +32,7 @@ func main() {
 			ShutdownTimeout time.Duration `default:"5s" envconfig:"SHUTDOWN_TIMEOUT"`
 		}
 		DB struct {
-			Host string `default:"root@tcp(db:3306)/passman" envconfig:"DB_HOST"`
+			Host string `default:"root@tcp(db:3306)/passman" envconfig:"MYSQL_ENDPOINT"`
 		}
 	}
 
