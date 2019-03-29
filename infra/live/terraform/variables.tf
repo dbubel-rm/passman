@@ -23,10 +23,10 @@ variable "app_count" {
   default     = 1
 }
 
-variable "ecs_task_execution_role" {
-  description = "Role arn for the ecsTaskExecutionRole"
-  default     = "arn:aws:iam::316188497159:role/ecsTaskExecutionRole"
-}
+# variable "ecs_task_execution_role" {
+#   description = "Role arn for the ecsTaskExecutionRole"
+#   default     = "arn:aws:iam::316188497159:role/ecsTaskExecutionRole"
+# }
 
 variable "health_check_path" {
   default = "/health"
