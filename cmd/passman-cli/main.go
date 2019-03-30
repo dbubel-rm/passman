@@ -35,7 +35,7 @@ type FirebaseStruct struct {
 	PassmanPayload string `json:"passmanPayload"`
 }
 
-var baseUrl = "http://passman-server-alb-1386890322.us-east-1.elb.amazonaws.com"
+var baseUrl = "http://ec2-100-25-42-237.compute-1.amazonaws.com:3000"
 
 var urlCreateAccount = baseUrl + "/v1/users"
 var urlDeleteUser = baseUrl + "/v1/users"
@@ -299,7 +299,12 @@ func nuke() {
 
 func register() {
 	payloadCreateAccount := `{"email": "%s","password": "%s","returnSecureToken": true}`
-
+	if len(argsWithoutProg) != 2 {
+		fmt.Println("Invalid option")
+		help()
+		return
+	}
+	// fmt.Println(argsWithoutProg)
 	username := argsWithoutProg[1]
 	password := os.Getenv(PASSMAN_MASTER)
 
