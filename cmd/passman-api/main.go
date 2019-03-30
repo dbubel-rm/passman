@@ -2,7 +2,7 @@ package main
 
 import (
 	"context"
-	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	_ "net/http/pprof"
@@ -18,10 +18,10 @@ import (
 	"github.com/kelseyhightower/envconfig"
 )
 
-var build = "develop-4"
+var build = "develop-6"
 
 func main() {
-	log := log.New(os.Stdout, "", log.LstdFlags|log.Lmicroseconds|log.Lshortfile)
+	log := log.New(os.Stdout, "", log.LstdFlags|log.Ltime|log.Lshortfile)
 
 	var cfg struct {
 		Web struct {
@@ -32,25 +32,28 @@ func main() {
 			ShutdownTimeout time.Duration `default:"5s" envconfig:"SHUTDOWN_TIMEOUT"`
 		}
 		DB struct {
-			Host string `default:"passman:1shadow1@tcp(passman-db.cfneifgjtyib.us-east-1.rds.amazonaws.com:3306)/passman" envconfig:"MYSQL_ENDPOINT"`, 
-			Username string`default:"passman" envconfig:"MYSQL_USERNAME"`,
-			Password string`default:"" envconfig:"MYSQL_PASSWORD"`,
+			Host     string `default:"localhost" envconfig:"MYSQL_ENDPOINT"`
+			Username string `default:"root" envconfig:"MYSQL_USERNAME"`
+			Password string `default:"" envconfig:"MYSQL_PASSWORD"`
+			Database string `default:"passman" envconfig:"MYSQL_DB"`
 		}
 	}
 
 	if err := envconfig.Process("PASSMAN", &cfg); err != nil {
 		log.Fatalf("Parsing Config : %v", err)
 	}
-
+	// cfgJSON, err := json.MarshalIndent(cfg, "", "    ")
+	connStr := fmt.Sprintf("%s:%s@tcp(%s:3306)/%s", cfg.DB.Username, cfg.DB.Password, cfg.DB.Host, cfg.DB.Database)
+	log.Println("Passman server starting", build)
 	// =========================================================================
 	// Start MySQL
 
-	log.Println("main : Started : Initialize MySQL", build)
-	var err error
+	log.Println("Initialize MySQL...")
+
 	var masterDB *db.MySQLDB
-	connStr := fmt.Sprintf("%s:%s@tcp()")
+	var err error
 	for i := 0; i < 20; i++ {
-		masterDB, err = db.New(cfg.DB.Host)
+		masterDB, err = db.New(connStr)
 		if err != nil {
 			log.Printf("main : Register DB : %s\n", err.Error())
 		} else {
@@ -70,15 +73,7 @@ func main() {
 		ReadTimeout:    cfg.Web.ReadTimeout,
 		WriteTimeout:   cfg.Web.WriteTimeout,
 	}
-
-	log.Printf("Started : Application Initializing version %q", build)
 	defer log.Println("App Shutdown")
-
-	cfgJSON, err := json.MarshalIndent(cfg, "", "    ")
-	if err != nil {
-		log.Fatalf("Marshalling Config to JSON : %v", err)
-	}
-	log.Printf("%v\n", string(cfgJSON))
 
 	// Make a channel to listen for errors coming from the listener. Use a
 	// buffered channel so the goroutine can exit if we don't collect this error.
@@ -95,20 +90,20 @@ func main() {
 	// /debug/vars - Added to the default mux by the expvars package.
 	// /debug/pprof - Added to the default mux by the net/http/pprof package.
 
-	// debug := http.Server{
-	// 	Addr:           cfg.Web.DebugHost,
-	// 	Handler:        http.DefaultServeMux,
-	// 	ReadTimeout:    cfg.Web.ReadTimeout,
-	// 	WriteTimeout:   cfg.Web.WriteTimeout,
-	// 	MaxHeaderBytes: 1 << 20,
-	// }
+	debug := http.Server{
+		Addr:           cfg.Web.DebugHost,
+		Handler:        http.DefaultServeMux,
+		ReadTimeout:    cfg.Web.ReadTimeout,
+		WriteTimeout:   cfg.Web.WriteTimeout,
+		MaxHeaderBytes: 1 << 20,
+	}
 
-	// // Not concerned with shutting this down when the
-	// // application is being shutdown.
-	// go func() {
-	// 	log.Printf("Debug Listening %s", cfg.Web.DebugHost)
-	// 	log.Printf("Debug Listener closed : %v", debug.ListenAndServe())
-	// }()
+	// Not concerned with shutting this down when the
+	// application is being shutdown.
+	go func() {
+		log.Printf("Debug Listening %s", cfg.Web.DebugHost)
+		log.Printf("Debug Listener closed : %v", debug.ListenAndServe())
+	}()
 
 	// Shutdown
 

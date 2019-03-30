@@ -17,7 +17,7 @@ run:
 stop:
 	docker-compose -f docker-compose.prod.yaml down
 deploy:
-	$(AWS_ACCESS_KEY_ID=$EB_KEY AWS_SECRET_ACCESS_KEY=$EB_SECRET aws ecr get-login --no-include-email --region us-east-1)
+	# $(AWS_ACCESS_KEY_ID=$EB_KEY AWS_SECRET_ACCESS_KEY=$EB_SECRET aws ecr get-login --no-include-email --region us-east-1)
 	docker build -t passman .
 	docker tag passman:latest stihl29/passman:latest
 	docker push stihl29/passman:latest
