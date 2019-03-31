@@ -103,6 +103,7 @@ func help() {
 	fmt.Printf("\t%s\t\tDeletes ALL credentials saved under you active account. Ex) passman %s\n", NUKE_ACCOUNT, NUKE_ACCOUNT)
 	fmt.Printf("\t%s\t\tAuthenticate a passman session good for 30 minutes\n", LOGIN)
 	fmt.Printf("\t%s\t\tGenerates a crypto random string. Ex) passman rand 16\n", GEN_PASS)
+	fmt.Printf("\t%s\t\tGets all the services in the accout\n", GET_SERVICES)
 	fmt.Printf("\t%s\t\tDisplays this message\n", HELP)
 	fmt.Printf("\t%s\t\tDisplays the version of passman\n", VERSION)
 }
@@ -364,8 +365,8 @@ func register() {
 }
 
 func insert() {
-	if len(argsWithoutProg) != 5 {
-		log.Println("Not enough args")
+	if len(argsWithoutProg) != 4 {
+		log.Println("Not enough args wanted 4 got", len(argsWithoutProg))
 		return
 	}
 

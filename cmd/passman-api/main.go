@@ -30,6 +30,7 @@ func main() {
 			ReadTimeout     time.Duration `default:"5s" envconfig:"READ_TIMEOUT"`
 			WriteTimeout    time.Duration `default:"5s" envconfig:"WRITE_TIMEOUT"`
 			ShutdownTimeout time.Duration `default:"5s" envconfig:"SHUTDOWN_TIMEOUT"`
+			EnableTLS       string        `default:"yes" envconfig:"ENABLE_TLS"`
 		}
 		DB struct {
 			Host     string `default:"localhost" envconfig:"MYSQL_ENDPOINT"`
@@ -82,7 +83,12 @@ func main() {
 	// Start the service listening for requests.
 	go func() {
 		log.Printf("API Listening %s", cfg.Web.APIHost)
-		serverErrors <- api.ListenAndServe()
+		if cfg.Web.EnableTLS == "no" {
+			serverErrors <- api.ListenAndServe()
+		} else {
+			fmt.Println("TLS ON")
+			serverErrors <- api.ListenAndServeTLS("MyCertificate.crt", "MyKey.key")
+		}
 	}()
 
 	// =========================================================================
