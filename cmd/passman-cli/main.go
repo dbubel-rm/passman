@@ -6,6 +6,7 @@ import (
 	"crypto/cipher"
 	"crypto/md5"
 	"crypto/rand"
+	"crypto/tls"
 	b64 "encoding/base64"
 	"encoding/hex"
 	"encoding/json"
@@ -35,7 +36,7 @@ type FirebaseStruct struct {
 	PassmanPayload string `json:"passmanPayload"`
 }
 
-var baseUrl = "http://ec2-100-25-42-237.compute-1.amazonaws.com:3000"
+var baseUrl = "https://ec2-100-25-42-237.compute-1.amazonaws.com:3000"
 
 var urlCreateAccount = baseUrl + "/v1/users"
 var urlDeleteUser = baseUrl + "/v1/users"
@@ -186,7 +187,7 @@ func signin() {
 		return
 	}
 
-	res, err := http.DefaultClient.Do(req)
+	res, err := skipTLS(req)
 
 	if err != nil {
 		log.Println(err.Error())
@@ -286,7 +287,7 @@ func nuke() {
 		log.Println(err.Error())
 	}
 
-	res, err := http.DefaultClient.Do(req)
+	res, err := skipTLS(req)
 
 	if err != nil {
 		fmt.Println(err.Error())
@@ -317,7 +318,7 @@ func register() {
 		return
 	}
 
-	res, err := http.DefaultClient.Do(req)
+	res, err := skipTLS(req)
 
 	if err != nil {
 		log.Println(err.Error())
@@ -352,7 +353,7 @@ func register() {
 
 	payloadVerifyAccount := fmt.Sprintf(`{"requestType": "VERIFY_EMAIL","idToken": "%s"}`, id.IdToken)
 	req, err = http.NewRequest("POST", urlVerifyAccount, strings.NewReader(payloadVerifyAccount))
-	res, err = http.DefaultClient.Do(req)
+	res, err = skipTLS(req)
 
 	if err != nil {
 		log.Println(err.Error())
@@ -401,7 +402,7 @@ func insert() {
 		return
 	}
 
-	res, err := http.DefaultClient.Do(req)
+	res, err := skipTLS(req)
 
 	if err != nil {
 		log.Println(err.Error())
@@ -460,7 +461,7 @@ func update() {
 		return
 	}
 
-	res, err := http.DefaultClient.Do(req)
+	res, err := skipTLS(req)
 
 	if err != nil {
 		log.Println(err.Error())
@@ -514,7 +515,7 @@ func get() {
 		return
 	}
 
-	res, err := http.DefaultClient.Do(req)
+	res, err := skipTLS(req)
 
 	if err != nil {
 		log.Println(err.Error())
@@ -570,6 +571,13 @@ func get() {
 	}
 	table.Render() // Send output
 }
+func skipTLS(r *http.Request) (*http.Response, error) {
+	transCfg := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true}, // ignore expired SSL certificates
+	}
+	client := &http.Client{Transport: transCfg}
+	return client.Do(r)
+}
 
 func services() {
 	tokenData, err := getUserStore()
@@ -594,7 +602,7 @@ func services() {
 		return
 	}
 
-	res, err := http.DefaultClient.Do(req)
+	res, err := skipTLS(req)
 
 	if err != nil {
 		log.Println(err.Error())
@@ -667,7 +675,7 @@ func rm() {
 		return
 	}
 
-	res, err := http.DefaultClient.Do(req)
+	res, err := skipTLS(req)
 
 	if err != nil {
 		log.Println(err.Error())
