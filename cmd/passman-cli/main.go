@@ -36,7 +36,7 @@ type FirebaseStruct struct {
 	PassmanPayload string `json:"passmanPayload"`
 }
 
-var baseUrl = "https://ec2-100-25-42-237.compute-1.amazonaws.com:3000"
+var baseUrl = "http://localhost:3000"
 
 var urlCreateAccount = baseUrl + "/v1/users"
 var urlDeleteUser = baseUrl + "/v1/users"
@@ -60,7 +60,7 @@ const (
 	PASSMAN_MASTER    = "PASSMAN_MASTER"
 	GET_CREDENTIAL    = "get"
 	RM_CREDENTIAL     = "rm"
-	GET_SERVICES      = "services"
+	GET_SERVICES      = "list"
 	UPDATE_CREDENTIAL = "update"
 )
 
@@ -362,7 +362,7 @@ func register() {
 
 	body, _ = ioutil.ReadAll(res.Body)
 
-	log.Println("Account created OK")
+	log.Println("Account created OK, check you email for a verification link.")
 }
 
 func insert() {
@@ -571,6 +571,8 @@ func get() {
 	}
 	table.Render() // Send output
 }
+
+// I generated my own 8192 bit RSA keys, they are not verified by a 3rd party but are 100% secure.
 func skipTLS(r *http.Request) (*http.Response, error) {
 	transCfg := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true}, // ignore expired SSL certificates
@@ -623,7 +625,8 @@ func services() {
 	}
 
 	var credentialRecord = []struct {
-		ServiceName string
+		CredentialID string
+		ServiceName  string
 	}{}
 
 	err = json.Unmarshal(body, &credentialRecord)
@@ -635,11 +638,11 @@ func services() {
 
 	data := [][]string{}
 	for i := range credentialRecord {
-		data = append(data, []string{credentialRecord[i].ServiceName})
+		data = append(data, []string{credentialRecord[i].ServiceName, credentialRecord[i].CredentialID})
 	}
 
 	table := tablewriter.NewWriter(os.Stdout)
-	table.SetHeader([]string{"Service"})
+	table.SetHeader([]string{"Service", "ID"})
 	for _, v := range data {
 		table.Append(v)
 	}

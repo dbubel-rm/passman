@@ -18,7 +18,7 @@ func API(log *log.Logger, db *db.MySQLDB, auth web.Middleware) http.Handler {
 		MasterDB: db.Database,
 	}
 
-	app.Handle("GET", "/health", check.Health)
+	app.Handle("POST", "/health", check.Health)
 
 	var apiKey = "AIzaSyBItfzjx74wXWCet-ARldNNpKIZVR1PQ5I%0A"
 	var firebaseBaseURL = "https://www.googleapis.com/identitytoolkit/v3/relyingparty"
@@ -48,6 +48,8 @@ func API(log *log.Logger, db *db.MySQLDB, auth web.Middleware) http.Handler {
 	app.Handle("DELETE", "/v1/credential/:serviceName", creds.delete, auth)
 	app.Handle("POST", "/v1/credential/update", creds.update, auth)
 	app.Handle("GET", "/v1/services", creds.services, auth)
+
+	// app.Handle("OPTIONS", "/v1/*name", creds.cors)
 	// TODO: get credentials by ID
 
 	return app

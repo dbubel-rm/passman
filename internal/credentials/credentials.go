@@ -31,7 +31,7 @@ func UpdateCredentialDB(dbConn *sqlx.DB, serviceName, password string, localID i
 
 func GetServicesDB(dbConn *sqlx.DB, localID interface{}) (*[]Service, error) {
 	var serviceList []Service
-	err := dbConn.Select(&serviceList, `SELECT service_name FROM credentials WHERE local_id = ?`, localID)
+	err := dbConn.Select(&serviceList, `SELECT credential_id, service_name FROM credentials WHERE local_id = ?`, localID)
 	return &serviceList, err
 }
 

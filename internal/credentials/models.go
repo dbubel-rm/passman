@@ -14,9 +14,10 @@ type Credential struct {
 
 type Update struct {
 	ServiceName string `json:"serviceName" validate:"required"`
-	Password string `json:"password" validate:"required"`
+	Password    string `json:"password" validate:"required"`
 }
 
 type Service struct {
-	ServiceName string `json:"serviceName" db:"service_name"`
+	CredentialID string `json:"credentialId" db:"credential_id"`
+	ServiceName  string `json:"serviceName" db:"service_name"`
 }
