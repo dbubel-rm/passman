@@ -13,7 +13,7 @@ import (
 	"strings"
 )
 
-var urlDeleteUser = baseUrl + "/v1/users"
+var urlDeleteUser = baseURL + "/v1/users"
 
 func Nuke(argsWithoutProg []string) {
 	tokenData, err := utils.GetUserStore(PassmanHome)

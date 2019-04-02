@@ -13,7 +13,7 @@ import (
 	"strings"
 )
 
-var urlUpdateCredential = baseUrl + "/v1/credential/update"
+var urlUpdateCredential = baseURL + "/v1/credential/update"
 
 func Update(argsWithoutProg []string) {
 	if len(argsWithoutProg) != 3 {

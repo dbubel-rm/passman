@@ -13,6 +13,6 @@ const (
 	RM_CREDENTIAL     = "rm"
 	GET_SERVICES      = "list"
 	UPDATE_CREDENTIAL = "update"
-	PassmanHome       = "~/.passman/session.json"
-	baseUrl           = "https://ec2-100-25-42-237.compute-1.amazonaws.com:3000"
+	PassmanHome       = "/.passman/session.json"
+	baseURL           = "https://ec2-100-25-42-237.compute-1.amazonaws.com:3000"
 )

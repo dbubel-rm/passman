@@ -11,8 +11,8 @@ import (
 	"strings"
 )
 
-var urlCreateAccount = baseUrl + "/v1/users"
-var urlVerifyAccount = baseUrl + "/v1/users/verify"
+var urlCreateAccount = baseURL + "/v1/users"
+var urlVerifyAccount = baseURL + "/v1/users/verify"
 
 func Register(argsWithoutProg []string) {
 	payloadCreateAccount := `{"email": "%s","password": "%s","returnSecureToken": true}`

@@ -14,7 +14,7 @@ import (
 	"os"
 )
 
-var urlNewCredential = baseUrl + "/v1/credential"
+var urlNewCredential = baseURL + "/v1/credential"
 
 func Get(argsWithoutProg []string) {
 	if len(argsWithoutProg) != 2 {

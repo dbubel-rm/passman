@@ -18,6 +18,7 @@ type Update struct {
 }
 
 type Service struct {
+	UpdatedAt    string `json:"updatedAt" db:"updated_at"`
 	CredentialID string `json:"credentialId" db:"credential_id"`
 	ServiceName  string `json:"serviceName" db:"service_name"`
 }

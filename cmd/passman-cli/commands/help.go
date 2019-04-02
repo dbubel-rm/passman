@@ -20,5 +20,4 @@ func Help(a []string) {
 	fmt.Printf("\t%s\t\tGets all the services in the accout\n", GET_SERVICES)
 	fmt.Printf("\t%s\t\tDisplays this message\n", HELP)
 	fmt.Printf("\t%s\t\tDisplays the version of passman\n", VERSION)
-
 }

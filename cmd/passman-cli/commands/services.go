@@ -3,16 +3,17 @@ package commands
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/dbubel/passman/cmd/passman-cli/models"
-	"github.com/dbubel/passman/cmd/passman-cli/utils"
-	"github.com/olekukonko/tablewriter"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
+
+	"github.com/dbubel/passman/cmd/passman-cli/models"
+	"github.com/dbubel/passman/cmd/passman-cli/utils"
+	"github.com/olekukonko/tablewriter"
 )
 
-var urlServices = baseUrl + "/v1/services"
+var urlServices = baseURL + "/v1/services"
 
 func Services(argsWithoutProgs []string) {
 	tokenData, err := utils.GetUserStore(PassmanHome)
@@ -60,6 +61,7 @@ func Services(argsWithoutProgs []string) {
 	var credentialRecord = []struct {
 		CredentialID string
 		ServiceName  string
+		UpdatedAt    string
 	}{}
 
 	err = json.Unmarshal(body, &credentialRecord)
@@ -71,11 +73,11 @@ func Services(argsWithoutProgs []string) {
 
 	data := [][]string{}
 	for i := range credentialRecord {
-		data = append(data, []string{credentialRecord[i].ServiceName, credentialRecord[i].CredentialID})
+		data = append(data, []string{credentialRecord[i].ServiceName, credentialRecord[i].CredentialID, credentialRecord[i].UpdatedAt})
 	}
 
 	table := tablewriter.NewWriter(os.Stdout)
-	table.SetHeader([]string{"Service", "ID"})
+	table.SetHeader([]string{"Service", "ID", "Updated At"})
 	for _, v := range data {
 		table.Append(v)
 	}

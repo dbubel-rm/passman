@@ -12,7 +12,13 @@ import (
 	"github.com/dbubel/passman/cmd/passman-cli/utils"
 )
 
-var urlAuthUser = baseUrl + "/v1/signin"
+var urlAuthUser = baseURL + "/v1/signin"
+var Usr string
+
+func init() {
+	u, _ := user.Current()
+	Usr = u.HomeDir
+}
 
 func Signin(argsWithoutProg []string) {
 	if len(argsWithoutProg) != 2 {
@@ -52,8 +58,8 @@ func Signin(argsWithoutProg []string) {
 	}
 
 	log.Println("Login OK")
-	usr, _ := user.Current()
-	err = ioutil.WriteFile(usr.HomeDir+"/.passman/session.json", body, 0644)
+
+	err = ioutil.WriteFile(Usr+"/.passman/session.json", body, 0644)
 
 	if err != nil {
 		log.Println(err.Error())
