@@ -130,7 +130,11 @@ func (f *Firebase) Delete(log *log.Logger, w http.ResponseWriter, r *http.Reques
 		return err
 	}
 
-	credentials.DeleteAccountDB(f.MasterDB, r.Context().Value("localId"))
+	err = credentials.DeleteAccountDB(f.MasterDB, r.Context().Value("localId"))
+	if err != nil {
+		web.RespondError(log, w, err, http.StatusInternalServerError)
+		return err
+	}
 	web.Respond(log, w, firebaseResp, res.StatusCode)
 	return nil
 }

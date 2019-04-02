@@ -21,7 +21,7 @@ func GenPassword(argsWithoutProg []string) {
 	n, _ := utils.GenerateRandomString(int(i))
 
 	data := [][]string{
-		[]string{n},
+		{n},
 	}
 	table := tablewriter.NewWriter(os.Stdout)
 	table.SetHeader([]string{"New Password"})
