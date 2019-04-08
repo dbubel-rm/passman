@@ -13,3 +13,8 @@ CREATE TABLE IF NOT EXISTS `credentials` (
 
 
 
+CREATE USER ''@'ip-10-0-0-41' IDENTIFIED BY '';
+GRANT SELECT on passman.credentials to 'passmanapp'@'%';
+GRANT INSERT on passman.credentials to 'passmanapp'@'%';
+GRANT DELETE on passman.credentials to 'passmanapp'@'%';
+GRANT UPDATE on passman.credentials to 'passmanapp'@'%';

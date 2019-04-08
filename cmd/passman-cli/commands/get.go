@@ -53,7 +53,7 @@ func Get(argsWithoutProg []string) {
 		return
 	}
 
-	body, _ := ioutil.ReadAll(res.Body)
+	body, err := ioutil.ReadAll(res.Body)
 
 	if err != nil {
 		log.Println(err.Error())
