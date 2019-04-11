@@ -18,8 +18,9 @@ import (
 	"github.com/kelseyhightower/envconfig"
 )
 
-var build = "develop-6"
+var build = "develop-7"
 
+// TODO: hash of the service name in the DB
 func main() {
 	log := log.New(os.Stdout, "", log.LstdFlags|log.Ltime|log.Lshortfile)
 

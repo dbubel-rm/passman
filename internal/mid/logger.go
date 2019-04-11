@@ -14,7 +14,7 @@ func RequestLogger(before web.Handler) web.Handler {
 	// Wrap this handler around the next one provided.
 	return func(log *log.Logger, w http.ResponseWriter, r *http.Request, params httprouter.Params) error {
 		err := before(log, w, r, params)
-		log.Printf("%s -> %d -> %s -> %s", r.Method, r.ContentLength, r.URL.Path, r.RemoteAddr)
+		log.Printf("%s -> %d -> %s", r.Method, r.ContentLength, r.RemoteAddr)
 		// For consistency return the error we received.
 		return err
 	}
