@@ -5,8 +5,10 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"math"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/dbubel/passman/cmd/passman-cli/models"
 	"github.com/dbubel/passman/cmd/passman-cli/utils"
@@ -70,14 +72,22 @@ func Services(argsWithoutProgs []string) {
 		log.Println(err.Error())
 		return
 	}
-
 	data := [][]string{}
 	for i := range credentialRecord {
-		data = append(data, []string{credentialRecord[i].ServiceName, credentialRecord[i].CredentialID, credentialRecord[i].UpdatedAt})
+
+		t, err := time.Parse("2006-01-02 15:04:05", credentialRecord[i].UpdatedAt)
+		s := fmt.Sprintf("%v", -1*math.Round(t.Sub(time.Now()).Hours()/24))
+		credentialRecord[i].UpdatedAt = s
+
+		if err != nil {
+			fmt.Println(err.Error())
+		}
+		// fmt.Println(t)
+		data = append(data, []string{credentialRecord[i].CredentialID, credentialRecord[i].ServiceName, credentialRecord[i].UpdatedAt})
 	}
 
 	table := tablewriter.NewWriter(os.Stdout)
-	table.SetHeader([]string{"Service", "ID", "Updated At"})
+	table.SetHeader([]string{"ID", "Service", "Last Updated day(s)"})
 	for _, v := range data {
 		table.Append(v)
 	}
