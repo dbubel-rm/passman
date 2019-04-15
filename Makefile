@@ -21,6 +21,7 @@ deploy:
 	docker build -t passman .
 	docker tag passman:latest stihl29/passman:latest
 	docker push stihl29/passman:latest
+cli:
+	cd cmd/passman-cli && CGO_ENABLED=0 go build -i -a -v -o `$GOPATH/bin/passman` -ldflags '-extldflags "-static"' main.go
 
-# CGO_ENABLED=0 go build -i -a -v -o $GOPATH/bin/passman -ldflags '-extldflags "-static"' main.go
 .PHONY: test test-local run build deploy
