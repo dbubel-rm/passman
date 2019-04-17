@@ -1,3 +1,4 @@
+Create database passman;
 CREATE TABLE IF NOT EXISTS `credentials` (
   `credential_id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `local_id` VARCHAR(29) NOT NULL,

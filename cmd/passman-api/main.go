@@ -31,10 +31,10 @@ func main() {
 			ReadTimeout     time.Duration `default:"5s" envconfig:"READ_TIMEOUT"`
 			WriteTimeout    time.Duration `default:"5s" envconfig:"WRITE_TIMEOUT"`
 			ShutdownTimeout time.Duration `default:"5s" envconfig:"SHUTDOWN_TIMEOUT"`
-			EnableTLS       string        `default:"yes" envconfig:"ENABLE_TLS"`
+			EnableTLS       string        `default:"no" envconfig:"ENABLE_TLS"`
 		}
 		DB struct {
-			Host     string `default:"localhost" envconfig:"MYSQL_ENDPOINT"`
+			Host     string `default:"host.docker.internal" envconfig:"MYSQL_ENDPOINT"`
 			Username string `default:"root" envconfig:"MYSQL_USERNAME"`
 			Password string `default:"" envconfig:"MYSQL_PASSWORD"`
 			Database string `default:"passman" envconfig:"MYSQL_DB"`
@@ -54,7 +54,7 @@ func main() {
 
 	var masterDB *db.MySQLDB
 	var err error
-	for i := 0; i < 20; i++ {
+	for i := 0; i < 30; i++ {
 		masterDB, err = db.New(connStr)
 		if err != nil {
 			log.Printf("main : Register DB : %s\n", err.Error())
