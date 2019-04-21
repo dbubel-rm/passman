@@ -8,9 +8,11 @@ CREATE TABLE IF NOT EXISTS `credentials` (
   `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`credential_id`),
-  UNIQUE KEY(`service_name`,`username`) 
+  UNIQUE KEY(`service_name`,`username`),
+  INDEX `credential` (`local_id`, `service_name`)
   -- FOREIGN KEY (`user_id`) REFERENCES users(`user_id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
 
 
 

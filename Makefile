@@ -12,10 +12,10 @@ test:
 test-local:
 	mysql -u root -e "create database if not exists passman;"
 	cd cmd/passman-api/ && DB_HOST="root@tcp(127.0.0.1:3306)/passman" go test -v ./...
-run:
-	docker-compose -f docker-compose.prod.yaml up --build -d
-stop:
-	docker-compose -f docker-compose.prod.yaml down
+run-dev:
+	docker-compose -f docker-compose.dev.yaml up --build -d
+stop-dev:
+	docker-compose -f docker-compose.dev.yaml down
 deploy:
 	# $(AWS_ACCESS_KEY_ID=$EB_KEY AWS_SECRET_ACCESS_KEY=$EB_SECRET aws ecr get-login --no-include-email --region us-east-1)
 	docker build -t passman .
@@ -24,4 +24,4 @@ deploy:
 cli:
 	cd cmd/passman-cli && CGO_ENABLED=0 go build -i -a -v -o `$GOPATH/bin/passman` -ldflags '-extldflags "-static"' main.go
 
-.PHONY: test test-local run build deploy
+.PHONY: test test-local run build deploy run-dev stop-dev
