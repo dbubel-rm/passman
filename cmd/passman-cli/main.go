@@ -28,7 +28,9 @@ func main() {
 
 	if os.Getenv(commands.PASSMAN_MASTER) == "" {
 		log.Printf("No %s environment vairable set\n", commands.PASSMAN_MASTER)
-		return
+		// return
+	} else {
+		
 	}
 
 	log.SetFlags(log.Lshortfile)
