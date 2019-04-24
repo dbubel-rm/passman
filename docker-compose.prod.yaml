@@ -1,26 +1,51 @@
 version: '2'
-
 services:
-  db:
-    build:
-      context: .
-      dockerfile: Dockerfile.passman.db
-    environment:
-      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
-      MYSQL_DATABASE: "passman"
-      MYSQL_ROOT_HOST: "%"
-
-  api:
+  passman-api:
+    restart: always
     build:
       context: .
       dockerfile: Dockerfile
-    environment:
-      ENV_NAME: test
-      MYSQL_ENDPOINT: "127.0.0.1"
-      MYSQL_PASSWORD: ""
-      MYSQL_USERNAME: "root"
-      MYSQL_DB: "passman"
+    # environment:
+    #   - NAME="Instance 1"
+
+  load-balancer:
+    depends_on:
+      - passman-api
+    restart: always
+    build:
+      context: .
+      dockerfile: Dockerfile.prod.nginx
+    # volumes:
+    #   - ./nginxlogs:/var/log/nginx
     ports:
-      - "3000:3000"
+      - "80:80"
+      - "443:443"
+
+      
+
+# version: '2'
+
+# services:
+#   db:
+#     build:
+#       context: .
+#       dockerfile: Dockerfile.passman.db
+#     environment:
+#       MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+#       MYSQL_DATABASE: "passman"
+#       MYSQL_ROOT_HOST: "%"
+
+#   api:
+#     build:
+#       context: .
+#       dockerfile: Dockerfile
+#     environment:
+#       ENV_NAME: test
+#       MYSQL_ENDPOINT: "127.0.0.1"
+#       MYSQL_PASSWORD: ""
+#       MYSQL_USERNAME: "root"
+#       MYSQL_DB: "passman"
+#     ports:
+#       - "3000:3000"
     
 
