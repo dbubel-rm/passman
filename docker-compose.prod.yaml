@@ -5,8 +5,13 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    # environment:
-    #   - NAME="Instance 1"
+    environment:
+      - MYSQL_ENDPOINT
+      - MYSQL_USERNAME
+      - MYSQL_PASSWORD
+      - MYSQL_DB
+    ports:
+      - "3000:3000"
 
   load-balancer:
     depends_on:
