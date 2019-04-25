@@ -6,10 +6,10 @@ services:
       context: .
       dockerfile: Dockerfile
     environment:
-      - MYSQL_ENDPOINT
-      - MYSQL_USERNAME
-      - MYSQL_PASSWORD
-      - MYSQL_DB
+      - MYSQL_ENDPOINT=${MYSQL_ENDPOINT}
+      - MYSQL_USERNAME=${MYSQL_USERNAME}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - MYSQL_DB=${MYSQL_DB}
     ports:
       - "3000:3000"
 
