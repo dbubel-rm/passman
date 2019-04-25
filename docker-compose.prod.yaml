@@ -15,8 +15,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.prod.nginx
-    # volumes:
-    #   - ./nginxlogs:/var/log/nginx
+    volumes:
+      - /etc/letsencrypt:/etc/letsencrypt
     ports:
       - "80:80"
       - "443:443"
