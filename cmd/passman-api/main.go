@@ -18,7 +18,7 @@ import (
 	"github.com/kelseyhightower/envconfig"
 )
 
-var build = "develop-7"
+var build = "develop-8"
 
 // TODO: hash of the service name in the DB
 func main() {
