@@ -23,5 +23,9 @@ deploy:
 	docker push stihl29/passman:latest
 cli:
 	cd cmd/passman-cli && CGO_ENABLED=0 go build -i -a -v -o `$GOPATH/bin/passman` -ldflags '-extldflags "-static"' main.go
+start:
+	MYSQL_ENDPOINT=$MYSQL_ENDPOINT MYSQL_USERNAME=$MYSQL_USERNAME MYSQL_PASSWORD=$MYSQL_PASSWORD MYSQL_DB=$MYSQL_DB docker-compose -f docker-compose.prod.yaml up --build -d
+stop: 
+	docker-compose -f docker-compose.prod.yaml down
 
-.PHONY: test test-local run build deploy run-dev stop-dev
+.PHONY: test test-local run build deploy run-dev stop-dev start stop
