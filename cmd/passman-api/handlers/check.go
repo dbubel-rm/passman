@@ -14,19 +14,32 @@ type Check struct {
 	MasterDB *sqlx.DB
 }
 
+var (
+	Build     string
+	GitHash   string
+	BuildDate string
+	InstanceID string
+)
+
 // Health validates the service is healthy and ready to accept requests.
 func (c *Check) Health(log *log.Logger, w http.ResponseWriter, r *http.Request, params httprouter.Params) error {
 
 	status := struct {
-		Status string `json:"status"`
+		DBStatus  string `json:"dbStatus"`
+		Version   string `json:"version"`
+		GitHash   string `json:"gitHash"`
+		BuildDate string `json:"buildDate"`
 	}{
-		Status: "ok",
+		DBStatus:  "ok",
+		Version:   Build,
+		GitHash:   GitHash,
+		BuildDate: BuildDate,
 	}
 
-	// err := c.MasterDB.Ping()
-	// if err != nil {
-	// 	web.RespondError(log, w, err, http.StatusInternalServerError)
-	// }
+	err := c.MasterDB.Ping()
+	if err != nil {
+		status.DBStatus = err.Error()
+	}
 
 	web.Respond(log, w, status, http.StatusOK)
 	return nil

@@ -18,10 +18,19 @@ import (
 	"github.com/kelseyhightower/envconfig"
 )
 
-var build = "develop-8"
+var (
+	BUILD = "develop-9"
+	GIT_HASH =""
+	BUILD_DATE = ""
+
+)
 
 // TODO: hash of the service name in the DB
 func main() {
+	handlers.Build = BUILD
+	handlers.GitHash = GIT_HASH
+	handlers.BuildDate = BUILD_DATE
+
 	log := log.New(os.Stdout, "", log.LstdFlags|log.Ltime|log.Lshortfile)
 
 	var cfg struct {
@@ -46,7 +55,7 @@ func main() {
 	}
 	// cfgJSON, err := json.MarshalIndent(cfg, "", "    ")
 	connStr := fmt.Sprintf("%s:%s@tcp(%s:3306)/%s", cfg.DB.Username, cfg.DB.Password, cfg.DB.Host, cfg.DB.Database)
-	log.Println("Passman server starting", build)
+	log.Println("Passman server starting", BUILD)
 	// =========================================================================
 	// Start MySQL
 
@@ -97,20 +106,20 @@ func main() {
 	// /debug/vars - Added to the default mux by the expvars package.
 	// /debug/pprof - Added to the default mux by the net/http/pprof package.
 
-	debug := http.Server{
-		Addr:           cfg.Web.DebugHost,
-		Handler:        http.DefaultServeMux,
-		ReadTimeout:    cfg.Web.ReadTimeout,
-		WriteTimeout:   cfg.Web.WriteTimeout,
-		MaxHeaderBytes: 1 << 20,
-	}
+	// debug := http.Server{
+	// 	Addr:           cfg.Web.DebugHost,
+	// 	Handler:        http.DefaultServeMux,
+	// 	ReadTimeout:    cfg.Web.ReadTimeout,
+	// 	WriteTimeout:   cfg.Web.WriteTimeout,
+	// 	MaxHeaderBytes: 1 << 20,
+	// }
 
-	// Not concerned with shutting this down when the
-	// application is being shutdown.
-	go func() {
-		log.Printf("Debug Listening %s", cfg.Web.DebugHost)
-		log.Printf("Debug Listener closed : %v", debug.ListenAndServe())
-	}()
+	// // Not concerned with shutting this down when the
+	// // application is being shutdown.
+	// go func() {
+	// 	log.Printf("Debug Listening %s", cfg.Web.DebugHost)
+	// 	log.Printf("Debug Listener closed : %v", debug.ListenAndServe())
+	// }()
 
 	// Shutdown
 
