@@ -16,7 +16,7 @@ import (
 var argsWithoutProg = os.Args[1:]
 
 func version(a []string) {
-	fmt.Println("v0.0.4")
+	fmt.Println("v0.0.5")
 }
 
 func main() {

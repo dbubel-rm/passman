@@ -19,10 +19,9 @@ import (
 )
 
 var (
-	BUILD = "develop-9"
-	GIT_HASH =""
+	BUILD      = "develop-10"
+	GIT_HASH   = ""
 	BUILD_DATE = ""
-
 )
 
 // TODO: hash of the service name in the DB
