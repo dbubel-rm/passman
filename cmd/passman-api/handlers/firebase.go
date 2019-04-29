@@ -3,6 +3,7 @@ package handlers
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 
@@ -14,11 +15,12 @@ import (
 )
 
 type Firebase struct {
-	SigninURL string
-	CreateURL string
-	DeleteURL string
-	VerifyURL string
-	MasterDB  *sqlx.DB
+	SigninURL         string
+	CreateURL         string
+	DeleteURL         string
+	VerifyURL         string
+	ChangePasswordURL string
+	MasterDB          *sqlx.DB
 }
 
 // Signin - Get a valid JWT for the user
@@ -92,6 +94,46 @@ func (f *Firebase) Create(log *log.Logger, w http.ResponseWriter, r *http.Reques
 		return err
 	}
 
+	web.Respond(log, w, firebaseResp, res.StatusCode)
+	return nil
+}
+
+// Create - adds new user in the firebase account
+func (f *Firebase) ChangePassword(log *log.Logger, w http.ResponseWriter, r *http.Request, params httprouter.Params) error {
+	var updatePws firebase.UpdatePassword
+
+	if err := web.Unmarshal(r.Body, &updatePws); err != nil {
+		return err
+	}
+	// r.Context().Value("token")
+
+	defer r.Body.Close()
+	updateJson, err := json.Marshal(updatePws)
+
+	if err != nil {
+		return err
+	}
+
+	req, err := http.NewRequest("POST", f.ChangePasswordURL, bytes.NewReader(updateJson))
+
+	if err != nil {
+		return err
+	}
+
+	res, err := http.DefaultClient.Do(req)
+
+	if err != nil {
+		return err
+	}
+
+	var firebaseResp interface{}
+	err = json.NewDecoder(res.Body).Decode(&firebaseResp)
+
+	if err != nil {
+		return err
+	}
+
+	fmt.Println(firebaseResp)
 	web.Respond(log, w, firebaseResp, res.StatusCode)
 	return nil
 }

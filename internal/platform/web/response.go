@@ -84,7 +84,7 @@ func RespondError(log *log.Logger, w http.ResponseWriter, err error, code int) {
 func Respond(log *log.Logger, w http.ResponseWriter, data interface{}, code int) {
 
 	if code == http.StatusNoContent || data == nil {
-		w.WriteHeader(code)
+		w.WriteHeader(200)
 		return
 	}
 

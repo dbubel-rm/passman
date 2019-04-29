@@ -3,14 +3,15 @@ package commands
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/dbubel/passman/cmd/passman-cli/models"
-	"github.com/dbubel/passman/cmd/passman-cli/secret"
-	"github.com/dbubel/passman/cmd/passman-cli/utils"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
 	"strings"
+
+	"github.com/dbubel/passman/cmd/passman-cli/models"
+	"github.com/dbubel/passman/cmd/passman-cli/secret"
+	"github.com/dbubel/passman/cmd/passman-cli/utils"
 )
 
 var urlUpdateCredential = baseURL + "/v1/credential/update"

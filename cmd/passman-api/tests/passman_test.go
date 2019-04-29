@@ -32,9 +32,9 @@ var f web.Middleware
 
 func init() {
 	f = mid.FakeAuth
-	l = log.New(ioutil.Discard, "", log.LstdFlags|log.Lmicroseconds|log.Lshortfile)
+	l = log.New(os.Stdout, "", log.LstdFlags|log.Lmicroseconds|log.Lshortfile)
 	var err error
-	var dsn = "root@tcp(db:3306)/passman"
+	var dsn = "root@tcp(localhost:3306)/passman"
 	if os.Getenv("DB_HOST") != "" {
 		dsn = os.Getenv("DB_HOST")
 	}
@@ -213,6 +213,45 @@ func TestPassman(t *testing.T) {
 	}
 
 	t.Logf("\t%s Delete credential.", Success)
+
+	// Test change password account
+	a = handlers.API(l, d, f).(*web.App)
+	r = httptest.NewRequest("POST", "/v1/users/password", strings.NewReader(fmt.Sprintf(`{"password":"newPAssword","returnSecureToken":true, "idToken":"%s"}`, s.IdToken)))
+	r.Header.Set("Authorization", tt)
+	w = httptest.NewRecorder()
+
+	a.ServeHTTP(w, r)
+
+	if w.Code != http.StatusOK {
+		b, _ := ioutil.ReadAll(w.Body)
+		fmt.Println(string(b))
+		t.Fatalf("\t%s Update password failed.", Failed)
+	}
+	t.Logf("\t%s Update password.", Success)
+
+	// Test signin Again
+	a = handlers.API(l, d, f).(*web.App)
+	r = httptest.NewRequest("GET", "/v1/signin", strings.NewReader(`{"email":"dean@dean.com","password":"newPAssword","returnSecureToken":true}`))
+	w = httptest.NewRecorder()
+
+	a.ServeHTTP(w, r)
+
+	if w.Code != http.StatusOK {
+		t.Fatalf("\t%s Signin failed.", Failed)
+	}
+	t.Logf("\t%s Signin.", Success)
+
+	// Test signin with wrong pass
+	a = handlers.API(l, d, f).(*web.App)
+	r = httptest.NewRequest("GET", "/v1/signin", strings.NewReader(`{"email":"dean@dean.com","password":"newPAss","returnSecureToken":true}`))
+	w = httptest.NewRecorder()
+
+	a.ServeHTTP(w, r)
+
+	if w.Code == http.StatusOK {
+		t.Fatalf("\t%s Signin wrong pass failed.", Failed)
+	}
+	t.Logf("\t%s Signin wrong pass.", Success)
 
 	// Test delete account
 	a = handlers.API(l, d, f).(*web.App)

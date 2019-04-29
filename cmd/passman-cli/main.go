@@ -7,6 +7,8 @@ import (
 	"os/user"
 
 	"github.com/dbubel/passman/cmd/passman-cli/commands"
+	"github.com/dbubel/passman/cmd/passman-cli/utils"
+	"golang.org/x/crypto/ssh/terminal"
 )
 
 //var baseUrl = "https://ec2-100-25-42-237.compute-1.amazonaws.com:3000"
@@ -27,10 +29,8 @@ func main() {
 	passmanHome := usr.HomeDir + "/.passman/session.json"
 
 	if os.Getenv(commands.PASSMAN_MASTER) == "" {
-		log.Printf("No %s environment vairable set\n", commands.PASSMAN_MASTER)
-		// return
-	} else {
-		
+		master := getUsernameAndPassword()
+		os.Setenv(commands.PASSMAN_MASTER, master)
 	}
 
 	log.SetFlags(log.Lshortfile)
@@ -48,6 +48,7 @@ func main() {
 	actions[commands.RM_CREDENTIAL] = commands.Rm
 	actions[commands.GET_SERVICES] = commands.Services
 	actions[commands.UPDATE_CREDENTIAL] = commands.Update
+	actions[commands.UPDATE_MASTER] = commands.UpdateMasterPass
 
 	if len(argsWithoutProg) == 0 {
 		log.Println("No action specified")
@@ -77,13 +78,13 @@ func main() {
 	}
 }
 
-// func getUsernameAndPassword() (string, string) {
-// 	fmt.Print("Username: ")
-// 	text, _ := bufio.NewReader(os.Stdin).ReadString('\n')
-// 	text = cleanInput(text)
-// 	fmt.Print("Password: ")
-// 	bytePassword, _ := terminal.ReadPassword(int(os.Stdin.Fd()))
-// 	password := cleanInput(string(bytePassword))
-// 	fmt.Println("")
-// 	return text, password
-// }
+func getUsernameAndPassword() string {
+	// fmt.Print("Username: ")
+	// text, _ := bufio.NewReader(os.Stdin).ReadString('\n')
+	// text = cleanInput(text)
+	fmt.Print("Password: ")
+	bytePassword, _ := terminal.ReadPassword(int(os.Stdin.Fd()))
+	password := utils.CleanInput(string(bytePassword))
+	fmt.Println("")
+	return password
+}

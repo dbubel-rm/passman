@@ -12,7 +12,7 @@ import (
 // I generated my own 8192 bit RSA keys, they are not verified by a 3rd party but are 100% secure.
 func SkipTLS(r *http.Request) (*http.Response, error) {
 	transCfg := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: true}, // ignore expired SSL certificates
+		TLSClientConfig: &tls.Config{}, // ignore expired SSL certificates
 	}
 	client := &http.Client{Transport: transCfg}
 	return client.Do(r)

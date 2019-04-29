@@ -23,16 +23,18 @@ func API(log *log.Logger, db *db.MySQLDB, auth web.Middleware) http.Handler {
 	var apiKey = "AIzaSyBItfzjx74wXWCet-ARldNNpKIZVR1PQ5I%0A"
 	var firebaseBaseURL = "https://www.googleapis.com/identitytoolkit/v3/relyingparty"
 	firebase := Firebase{
-		MasterDB:  db.Database,
-		SigninURL: fmt.Sprintf("%s/verifyPassword?key=%s", firebaseBaseURL, apiKey),
-		CreateURL: fmt.Sprintf("%s/signupNewUser?key=%s", firebaseBaseURL, apiKey),
-		DeleteURL: fmt.Sprintf("%s/deleteAccount?key=%s", firebaseBaseURL, apiKey),
-		VerifyURL: fmt.Sprintf("%s/getOobConfirmationCode?key=%s", firebaseBaseURL, apiKey),
+		MasterDB:          db.Database,
+		SigninURL:         fmt.Sprintf("%s/verifyPassword?key=%s", firebaseBaseURL, apiKey),
+		CreateURL:         fmt.Sprintf("%s/signupNewUser?key=%s", firebaseBaseURL, apiKey),
+		DeleteURL:         fmt.Sprintf("%s/deleteAccount?key=%s", firebaseBaseURL, apiKey),
+		VerifyURL:         fmt.Sprintf("%s/getOobConfirmationCode?key=%s", firebaseBaseURL, apiKey),
+		ChangePasswordURL: fmt.Sprintf("%s/setAccountInfo?key=%s", firebaseBaseURL, apiKey),
 	}
 
 	// TODO: update account password
 	app.Handle("POST", "/v1/users", firebase.Create)
 	app.Handle("POST", "/v1/users/verify", firebase.Verify)
+	app.Handle("POST", "/v1/users/password", firebase.ChangePassword, auth)
 	app.Handle("DELETE", "/v1/users", firebase.Delete, auth)
 	app.Handle("GET", "/v1/signin", firebase.Signin)
 

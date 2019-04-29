@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"log"
 
 	"net/http"
@@ -21,6 +22,7 @@ func (c *Credentials) add(log *log.Logger, w http.ResponseWriter, r *http.Reques
 	if err := web.Unmarshal(r.Body, &add); err != nil {
 		return err
 	}
+	fmt.Println(add)
 	defer r.Body.Close()
 
 	err := credentials.AddCredentialDB(c.MasterDB, &add, r.Context().Value("localId"))

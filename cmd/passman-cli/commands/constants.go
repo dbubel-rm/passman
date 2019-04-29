@@ -13,6 +13,8 @@ const (
 	RM_CREDENTIAL     = "rm"
 	GET_SERVICES      = "list"
 	UPDATE_CREDENTIAL = "update"
+	UPDATE_MASTER     = "master"
 	PassmanHome       = "/.passman/session.json"
-	baseURL           = "https://engineerbeard.com:3000"
+	// baseURL           = "https://engineerbeard.com"
+	baseURL = "http://localhost:3000"
 )
