@@ -19,7 +19,7 @@ import (
 )
 
 var (
-	BUILD      = "develop-10"
+	BUILD      = "develop-11"
 	GIT_HASH   = ""
 	BUILD_DATE = ""
 )
