@@ -11,6 +11,8 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/dbubel/namer"
+
 	"github.com/dbubel/passman/internal/mid"
 
 	"github.com/dbubel/passman/cmd/passman-api/handlers"
@@ -19,9 +21,10 @@ import (
 )
 
 var (
-	BUILD      = "develop-11"
-	GIT_HASH   = ""
-	BUILD_DATE = ""
+	BUILD         = "develop-11"
+	GIT_HASH      = ""
+	BUILD_DATE    = ""
+	INSTANCE_NAME = ""
 )
 
 // TODO: hash of the service name in the DB
@@ -29,6 +32,7 @@ func main() {
 	handlers.Build = BUILD
 	handlers.GitHash = GIT_HASH
 	handlers.BuildDate = BUILD_DATE
+	handlers.InstanceID = namer.GetRandomName()
 
 	log := log.New(os.Stdout, "", log.LstdFlags|log.Ltime|log.Lshortfile)
 

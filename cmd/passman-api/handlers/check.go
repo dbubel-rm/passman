@@ -15,9 +15,9 @@ type Check struct {
 }
 
 var (
-	Build     string
-	GitHash   string
-	BuildDate string
+	Build      string
+	GitHash    string
+	BuildDate  string
 	InstanceID string
 )
 
@@ -25,15 +25,17 @@ var (
 func (c *Check) Health(log *log.Logger, w http.ResponseWriter, r *http.Request, params httprouter.Params) error {
 
 	status := struct {
-		DBStatus  string `json:"dbStatus"`
-		Version   string `json:"version"`
-		GitHash   string `json:"gitHash"`
-		BuildDate string `json:"buildDate"`
+		DBStatus   string `json:"dbStatus"`
+		Version    string `json:"version"`
+		GitHash    string `json:"gitHash"`
+		BuildDate  string `json:"buildDate"`
+		InstanceID string `json:"instanceId"`
 	}{
-		DBStatus:  "ok",
-		Version:   Build,
-		GitHash:   GitHash,
-		BuildDate: BuildDate,
+		DBStatus:   "ok",
+		Version:    Build,
+		GitHash:    GitHash,
+		BuildDate:  BuildDate,
+		InstanceID: InstanceID,
 	}
 
 	err := c.MasterDB.Ping()
