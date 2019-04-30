@@ -1,5 +1,7 @@
 # github.com/davecgh/go-spew v1.1.0
 github.com/davecgh/go-spew/spew
+# github.com/dbubel/namer v0.0.0-20190426210743-b56c5e198e9f
+github.com/dbubel/namer
 # github.com/dgrijalva/jwt-go v3.2.0+incompatible
 github.com/dgrijalva/jwt-go
 # github.com/gin-contrib/sse v0.0.0-20190125020943-a7658810eb74
@@ -50,10 +52,12 @@ github.com/stretchr/testify/assert
 # github.com/ugorji/go/codec v0.0.0-20190128213124-ee1426cffec0
 github.com/ugorji/go/codec
 # golang.org/x/crypto v0.0.0-20190130090550-b01c7a725664
+golang.org/x/crypto/ssh/terminal
 golang.org/x/crypto/bcrypt
 golang.org/x/crypto/blowfish
 # golang.org/x/sys v0.0.0-20190130150945-aca44879d564
 golang.org/x/sys/unix
+golang.org/x/sys/windows
 # google.golang.org/appengine v1.4.0
 google.golang.org/appengine/cloudsql
 # gopkg.in/go-playground/validator.v8 v8.18.2

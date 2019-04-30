@@ -1,6 +1,7 @@
 module github.com/dbubel/passman
 
 require (
+	github.com/dbubel/namer v0.0.0-20190426210743-b56c5e198e9f
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/gin-contrib/sse v0.0.0-20190125020943-a7658810eb74 // indirect
 	github.com/gin-gonic/gin v1.3.0
