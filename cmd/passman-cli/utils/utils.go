@@ -5,7 +5,6 @@ import (
 	"crypto/tls"
 	"io/ioutil"
 	"net/http"
-	"os/user"
 	"strings"
 )
 
@@ -44,15 +43,19 @@ func CleanInput(s string) string {
 	return s
 }
 
-var Usr string
+var passmanHome string
 
-func init() {
-	u, _ := user.Current()
-	Usr = u.HomeDir
+// func init() {
+// 	u, _ := user.Current()
+// 	Usr = u.HomeDir
+// }
+
+func New(passmanHome string) {
+	passmanHome = passmanHome
 }
 
 func GetUserStore(passmanHome string) ([]byte, error) {
-	bytes, err := ioutil.ReadFile(Usr + passmanHome)
+	bytes, err := ioutil.ReadFile(passmanHome)
 	if err != nil {
 		return bytes, err
 	}

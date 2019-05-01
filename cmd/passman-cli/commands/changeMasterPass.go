@@ -68,7 +68,8 @@ func UpdateMasterPass(argsWithoutProg []string) {
 
 	log.Println(string(body))
 
-	Services(argsWithoutProg)
+	creds := GetCredentialRecords()
+	fmt.Println("CREDS HERE", creds)
 	// var credentialRecord = []struct {
 	// 	CredentialID string
 	// 	ServiceName  string
