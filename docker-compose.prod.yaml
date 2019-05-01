@@ -10,8 +10,6 @@ services:
       - MYSQL_USERNAME
       - MYSQL_PASSWORD
       - MYSQL_DB
-    # ports:
-    #   - "3000:3000"
 
   load-balancer:
     depends_on:

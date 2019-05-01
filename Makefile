@@ -7,7 +7,6 @@ build:
 test:
 	docker-compose -f docker-compose.yaml up --build --abort-on-container-exit
 test-local:
-	mysql -u root -e "create database if not exists passman;"
 	cd cmd/passman-api/ && MYSQL_ENDPOINT=localhost go test -v ./...
 run-dev:
 	docker-compose -f docker-compose.dev.yaml up --build -d
