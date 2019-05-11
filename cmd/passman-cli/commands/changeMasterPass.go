@@ -12,7 +12,7 @@ import (
 	"github.com/dbubel/passman/cmd/passman-cli/utils"
 )
 
-var urlNewCredentials = baseURL + "/v1/users/password"
+var changePassword = baseURL + "/v1/users/password"
 
 func UpdateMasterPass(argsWithoutProg []string) {
 	fmt.Println(argsWithoutProg)
@@ -38,7 +38,7 @@ func UpdateMasterPass(argsWithoutProg []string) {
 	payload := fmt.Sprintf(`{"idToken":"%s","password":"%s","returnSecureToken":true}`, storedJWT.IDToken, argsWithoutProg[1])
 	// fmt.Println(payload)
 	// return
-	req, err := http.NewRequest("POST", urlNewCredentials, strings.NewReader(payload))
+	req, err := http.NewRequest("POST", changePassword, strings.NewReader(payload))
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", storedJWT.IDToken))
 
 	if err != nil {
