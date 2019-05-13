@@ -23,36 +23,59 @@ func getConfigInfo() (models.Config, error) {
 
 	passmanConfig := usr.HomeDir + "/.passman/config.json"
 	dat, err := ioutil.ReadFile(passmanConfig)
-	json.Unmarshal(dat, &cfg)
+	err = json.Unmarshal(dat, &cfg)
+	return cfg, err
+}
+
+func getSessionInfo() (models.FirebaseSession, error) {
+	var cfg models.FirebaseSession
+	usr, err := user.Current()
+	if err != nil {
+		return cfg, err
+	}
+
+	session := usr.HomeDir + "/.passman/session.json"
+	dat, err := ioutil.ReadFile(session)
+	err = json.Unmarshal(dat, &cfg)
 	return cfg, err
 }
 
 type LoginCommand struct {
-	EmailAddress string
-	Ui           cli.Ui
-	UserHome     string
+	Username string
+	Password string
+	Ui       cli.Ui
+	UserHome string
 }
 
 func (c *LoginCommand) Run(args []string) int {
 
 	cmdFlags := flag.NewFlagSet("login", flag.ContinueOnError)
-	cmdFlags.StringVar(&c.EmailAddress, "u", "", "Email address")
+	cmdFlags.StringVar(&c.Username, "u", "", "Email address")
+	cmdFlags.StringVar(&c.Password, "p", "", "Password")
 	cmdFlags.Parse(args)
 
-	if c.EmailAddress == "" {
-		c.Ui.Error(fmt.Sprint(c.Help()))
+	cfg, _ := getConfigInfo()
+
+	if c.Username == "" {
+		c.Username = cfg.Username
+	}
+
+	if c.Username == "" {
+		c.Ui.Error(c.Help())
 		return 1
 	}
 
-	cfg, err := getConfigInfo()
+	if c.Password == "" {
+		c.Username = cfg.Password
+	}
 
-	if err != nil {
-		c.Ui.Error(err.Error())
+	if c.Password == "" {
+		c.Ui.Error(c.Help())
 		return 1
 	}
 
-	var payload = `{"email":"%s","password":"%s","returnSecureToken": true}`
-	payload = fmt.Sprintf(payload, c.EmailAddress, cfg.Password)
+	payload := `{"email":"%s","password":"%s","returnSecureToken": true}`
+	payload = fmt.Sprintf(payload, c.Username, c.Password)
 	req, _ := http.NewRequest("GET", cfg.Backend+"/v1/signin", strings.NewReader(payload))
 
 	client := &http.Client{}
@@ -88,7 +111,7 @@ func (c *LoginCommand) Run(args []string) int {
 }
 
 func (c *LoginCommand) Help() string {
-	return "Login to your passman account (Ex. passman login -u <example@email.com>)"
+	return "passman login -u <example@email.com> -p <password>"
 }
 
 func (c *LoginCommand) Synopsis() string {

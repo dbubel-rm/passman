@@ -93,6 +93,42 @@ func main() {
 				UserHome: usr.HomeDir,
 			}, nil
 		},
+		"get": func() (cli.Command, error) {
+			return &commands.GetCommand{
+				UI: &cli.ColoredUi{
+					Ui:          ui,
+					OutputColor: cli.UiColorBlue,
+					ErrorColor:  cli.UiColorRed,
+				},
+			}, nil
+		},
+		"add": func() (cli.Command, error) {
+			return &commands.AddCommand{
+				UI: &cli.ColoredUi{
+					Ui:          ui,
+					OutputColor: cli.UiColorBlue,
+					ErrorColor:  cli.UiColorRed,
+				},
+			}, nil
+		},
+		"list": func() (cli.Command, error) {
+			return &commands.ListCommand{
+				UI: &cli.ColoredUi{
+					Ui:          ui,
+					OutputColor: cli.UiColorBlue,
+					ErrorColor:  cli.UiColorRed,
+				},
+			}, nil
+		},
+		"remove": func() (cli.Command, error) {
+			return &commands.RemoveCommand{
+				UI: &cli.ColoredUi{
+					Ui:          ui,
+					OutputColor: cli.UiColorBlue,
+					ErrorColor:  cli.UiColorRed,
+				},
+			}, nil
+		},
 	}
 
 	_, err := c.Run()
