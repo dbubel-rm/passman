@@ -14,7 +14,6 @@ const (
 	GET_SERVICES      = "list"
 	UPDATE_CREDENTIAL = "update"
 	UPDATE_MASTER     = "master"
-	// baseURL           = "https://engineerbeard.com"
 	baseURL = "http://localhost:3000"
 )
 
