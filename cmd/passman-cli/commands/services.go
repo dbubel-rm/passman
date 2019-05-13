@@ -18,11 +18,44 @@ import (
 var urlServices = baseURL + "/v1/services"
 
 func Services(argsWithoutProgs []string) {
+
+	credentialRecord := GetCredentialRecords()
+	data := [][]string{}
+	for i := range credentialRecord {
+
+		t, err := time.Parse("2006-01-02 15:04:05", credentialRecord[i].UpdatedAt)
+		s := fmt.Sprintf("%v", -1*math.Round(t.Sub(time.Now()).Hours()/24))
+		credentialRecord[i].UpdatedAt = s
+
+		if err != nil {
+			log.Println(err.Error())
+		}
+		// fmt.Println(t)
+		data = append(data, []string{credentialRecord[i].CredentialID, credentialRecord[i].ServiceName, credentialRecord[i].UpdatedAt})
+	}
+
+	table := tablewriter.NewWriter(os.Stdout)
+	table.SetHeader([]string{"ID", "Service", "Last Updated day(s)"})
+	for _, v := range data {
+		table.Append(v)
+	}
+	table.Render()
+}
+
+type credentialRecords []struct {
+	CredentialID string
+	ServiceName  string
+	UpdatedAt    string
+}
+
+func GetCredentialRecords() credentialRecords {
+	credentialRecord := credentialRecords{}
+
 	tokenData, err := utils.GetUserStore(PassmanHome)
 
 	if err != nil {
 		log.Println(err.Error())
-		return
+		return credentialRecord
 	}
 
 	var storedJWT models.FirebaseStruct
@@ -37,14 +70,14 @@ func Services(argsWithoutProgs []string) {
 
 	if err != nil {
 		log.Println(err.Error())
-		return
+		return credentialRecord
 	}
 
 	res, err := utils.SkipTLS(req)
 
 	if err != nil {
 		log.Println(err.Error())
-		return
+		return credentialRecord
 	}
 
 	body, _ := ioutil.ReadAll(res.Body)
@@ -57,39 +90,9 @@ func Services(argsWithoutProgs []string) {
 
 	if res.StatusCode != 200 {
 		log.Println(string(body))
-		return
+		return credentialRecord
 	}
-
-	var credentialRecord = []struct {
-		CredentialID string
-		ServiceName  string
-		UpdatedAt    string
-	}{}
 
 	err = json.Unmarshal(body, &credentialRecord)
-
-	if err != nil {
-		log.Println(err.Error())
-		return
-	}
-	data := [][]string{}
-	for i := range credentialRecord {
-
-		t, err := time.Parse("2006-01-02 15:04:05", credentialRecord[i].UpdatedAt)
-		s := fmt.Sprintf("%v", -1*math.Round(t.Sub(time.Now()).Hours()/24))
-		credentialRecord[i].UpdatedAt = s
-
-		if err != nil {
-			fmt.Println(err.Error())
-		}
-		// fmt.Println(t)
-		data = append(data, []string{credentialRecord[i].CredentialID, credentialRecord[i].ServiceName, credentialRecord[i].UpdatedAt})
-	}
-
-	table := tablewriter.NewWriter(os.Stdout)
-	table.SetHeader([]string{"ID", "Service", "Last Updated day(s)"})
-	for _, v := range data {
-		table.Append(v)
-	}
-	table.Render()
+	return credentialRecord
 }

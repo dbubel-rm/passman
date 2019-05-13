@@ -29,6 +29,7 @@ func Signin(argsWithoutProg []string) {
 	username := argsWithoutProg[1]
 	password := os.Getenv(PASSMAN_MASTER)
 
+	fmt.Println("Using pass", password)
 	var payload = `{"email":"%s","password":"%s","returnSecureToken": true}`
 	payload = fmt.Sprintf(payload, username, password)
 	req, err := http.NewRequest("GET", urlAuthUser, strings.NewReader(payload))

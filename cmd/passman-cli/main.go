@@ -26,7 +26,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	passmanHome := usr.HomeDir + "/.passman/session.json"
+	commands.PassmanHome = usr.HomeDir + "/.passman/session.json"
 
 	if os.Getenv(commands.PASSMAN_MASTER) == "" {
 		master := getUsernameAndPassword()
@@ -56,14 +56,14 @@ func main() {
 		return
 	}
 
-	_, err = os.Stat(passmanHome)
+	_, err = os.Stat(commands.PassmanHome)
 
-	if err != nil {
-		fmt.Println(err.Error())
-	}
+	// if err != nil {
+	// 	fmt.Println(err.Error())
+	// }
 	if os.IsNotExist(err) {
 		fmt.Println("trying to create")
-		_, e := os.Create(passmanHome)
+		_, e := os.Create(commands.PassmanHome)
 		if e != nil {
 			fmt.Println("bad create", e.Error())
 		}

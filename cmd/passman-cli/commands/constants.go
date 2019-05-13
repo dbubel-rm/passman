@@ -14,6 +14,7 @@ const (
 	GET_SERVICES      = "list"
 	UPDATE_CREDENTIAL = "update"
 	UPDATE_MASTER     = "master"
-	PassmanHome       = "/.passman/session.json"
-	baseURL           = "https://engineerbeard.com"
+	baseURL = "http://localhost:3000"
 )
+
+var PassmanHome = "/.passman/session.json"

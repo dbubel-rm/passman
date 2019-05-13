@@ -3,12 +3,13 @@ package commands
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/dbubel/passman/cmd/passman-cli/utils"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
 	"strings"
+
+	"github.com/dbubel/passman/cmd/passman-cli/utils"
 )
 
 var urlCreateAccount = baseURL + "/v1/users"
@@ -54,7 +55,8 @@ func Register(argsWithoutProg []string) {
 		return
 	}
 
-	err = ioutil.WriteFile(PassmanHome, body, 0644)
+	fmt.Println(PassmanHome)
+	err = ioutil.WriteFile(PassmanHome, body, 0777)
 
 	if err != nil {
 		log.Println(err.Error())
