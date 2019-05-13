@@ -2,89 +2,148 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"os/user"
 
 	"github.com/dbubel/passman/cmd/passman-cli/commands"
-	"github.com/dbubel/passman/cmd/passman-cli/utils"
-	"golang.org/x/crypto/ssh/terminal"
+	"github.com/mitchellh/cli"
 )
 
-//var baseUrl = "https://ec2-100-25-42-237.compute-1.amazonaws.com:3000"
-
-var argsWithoutProg = os.Args[1:]
-
-func version(a []string) {
-	fmt.Println("v0.0.5")
+func fileExists(filename string) bool {
+	info, err := os.Stat(filename)
+	if os.IsNotExist(err) {
+		return false
+	}
+	return !info.IsDir()
 }
-
 func main() {
 
-	usr, err := user.Current()
-	if err != nil {
-		log.Fatal(err)
-	}
+	// passmanHome := usr.HomeDir + "/.passman/session.json"
 
-	commands.PassmanHome = usr.HomeDir + "/.passman/session.json"
+	// if os.Getenv(commands.PASSMAN_MASTER) == "" {
+	// 	// master := getUsernameAndPassword()
+	// 	os.Setenv(commands.PASSMAN_MASTER, master)
+	// }
 
-	if os.Getenv(commands.PASSMAN_MASTER) == "" {
-		master := getUsernameAndPassword()
-		os.Setenv(commands.PASSMAN_MASTER, master)
-	}
+	// f, err := os.Create("/tmp/dat2")
 
-	log.SetFlags(log.Lshortfile)
-
-	actions := make(map[string]func(a []string))
-	actions[commands.HELP] = commands.Help
-	actions[commands.VERSION] = version
-	actions[commands.GEN_PASS] = commands.GenPassword
-	// API calls
-	actions[commands.LOGIN] = commands.Signin
-	actions[commands.REGISTER_ACCOUNT] = commands.Register
-	actions[commands.NUKE_ACCOUNT] = commands.Nuke
-	actions[commands.INSERT_CREDENTIAL] = commands.Insert
-	actions[commands.GET_CREDENTIAL] = commands.Get
-	actions[commands.RM_CREDENTIAL] = commands.Rm
-	actions[commands.GET_SERVICES] = commands.Services
-	actions[commands.UPDATE_CREDENTIAL] = commands.Update
-	actions[commands.UPDATE_MASTER] = commands.UpdateMasterPass
-
-	if len(argsWithoutProg) == 0 {
-		log.Println("No action specified")
-		commands.Help(argsWithoutProg)
-		return
-	}
-
-	_, err = os.Stat(commands.PassmanHome)
+	// _, err = os.Stat(passmanHome)
 
 	// if err != nil {
 	// 	fmt.Println(err.Error())
 	// }
-	if os.IsNotExist(err) {
-		fmt.Println("trying to create")
-		_, e := os.Create(commands.PassmanHome)
-		if e != nil {
-			fmt.Println("bad create", e.Error())
-		}
+	// if os.IsNotExist(err) {
+	// 	fmt.Println("trying to create")
+	// 	_, e := os.Create(commands.PassmanHome)
+	// 	if e != nil {
+	// 		fmt.Println("bad create", e.Error())
+	// 	}
+	// }
+
+	ui := &cli.BasicUi{
+		Reader:      os.Stdin,
+		Writer:      os.Stdout,
+		ErrorWriter: os.Stderr,
 	}
 
-	action, ok := actions[argsWithoutProg[0]]
-	if ok {
-		action(argsWithoutProg)
-	} else {
-		log.Println("Invalid action specified")
-		commands.Help(argsWithoutProg)
-	}
-}
+	c := cli.NewCLI("passman cli", "0.0.1")
 
-func getUsernameAndPassword() string {
-	// fmt.Print("Username: ")
-	// text, _ := bufio.NewReader(os.Stdin).ReadString('\n')
-	// text = cleanInput(text)
-	fmt.Print("Password: ")
-	bytePassword, _ := terminal.ReadPassword(int(os.Stdin.Fd()))
-	password := utils.CleanInput(string(bytePassword))
-	fmt.Println("")
-	return password
+	usr, _ := user.Current()
+	c.Args = os.Args[1:]
+	// c.Autocomplete = true
+
+	c.Commands = map[string]cli.CommandFactory{
+		"login": func() (cli.Command, error) {
+			return &commands.LoginCommand{
+				Ui: &cli.ColoredUi{
+					Ui:          ui,
+					OutputColor: cli.UiColorBlue,
+					ErrorColor:  cli.UiColorRed,
+				},
+				UserHome: usr.HomeDir,
+			}, nil
+		},
+		"new": func() (cli.Command, error) {
+			return &commands.SignupCommand{
+				UI: &cli.ColoredUi{
+					Ui:          ui,
+					OutputColor: cli.UiColorBlue,
+					ErrorColor:  cli.UiColorRed,
+				},
+				UserHome: usr.HomeDir,
+			}, nil
+		},
+		"lock": func() (cli.Command, error) {
+			return &commands.LockCommand{
+				UI: &cli.ColoredUi{
+					Ui:          ui,
+					OutputColor: cli.UiColorBlue,
+					ErrorColor:  cli.UiColorRed,
+				},
+				UserHome: usr.HomeDir,
+			}, nil
+		},
+		"unlock": func() (cli.Command, error) {
+			return &commands.UnlockCommand{
+				UI: &cli.ColoredUi{
+					Ui:          ui,
+					OutputColor: cli.UiColorBlue,
+					ErrorColor:  cli.UiColorRed,
+				},
+				UserHome: usr.HomeDir,
+			}, nil
+		},
+		"get": func() (cli.Command, error) {
+			return &commands.GetCommand{
+				UI: &cli.ColoredUi{
+					Ui:          ui,
+					OutputColor: cli.UiColorBlue,
+					ErrorColor:  cli.UiColorRed,
+				},
+			}, nil
+		},
+		"add": func() (cli.Command, error) {
+			return &commands.AddCommand{
+				UI: &cli.ColoredUi{
+					Ui:          ui,
+					OutputColor: cli.UiColorBlue,
+					ErrorColor:  cli.UiColorRed,
+				},
+			}, nil
+		},
+		"list": func() (cli.Command, error) {
+			return &commands.ListCommand{
+				UI: &cli.ColoredUi{
+					Ui:          ui,
+					OutputColor: cli.UiColorBlue,
+					ErrorColor:  cli.UiColorRed,
+				},
+			}, nil
+		},
+		"remove": func() (cli.Command, error) {
+			return &commands.RemoveCommand{
+				UI: &cli.ColoredUi{
+					Ui:          ui,
+					OutputColor: cli.UiColorBlue,
+					ErrorColor:  cli.UiColorRed,
+				},
+			}, nil
+		},
+		"rand": func() (cli.Command, error) {
+			return &commands.RandCommand{
+				UI: &cli.ColoredUi{
+					Ui:          ui,
+					OutputColor: cli.UiColorBlue,
+					ErrorColor:  cli.UiColorRed,
+				},
+			}, nil
+		},
+	}
+
+	_, err := c.Run()
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err.Error())
+	}
+
+	// os.Exit(exitStatus)
 }
