@@ -121,5 +121,5 @@ func (c *GetCommand) Help() string {
 }
 
 func (c *GetCommand) Synopsis() string {
-	return "lock the config file"
+	return "Get a credential that you've stored in passman"
 }

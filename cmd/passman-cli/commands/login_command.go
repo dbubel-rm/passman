@@ -66,7 +66,7 @@ func (c *LoginCommand) Run(args []string) int {
 	}
 
 	if c.Password == "" {
-		c.Username = cfg.Password
+		c.Password = cfg.Password
 	}
 
 	if c.Password == "" {

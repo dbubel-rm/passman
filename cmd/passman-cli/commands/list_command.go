@@ -10,6 +10,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/dbubel/passman/cmd/passman-cli/models"
 	"github.com/mitchellh/cli"
 	"github.com/olekukonko/tablewriter"
 )
@@ -55,9 +56,11 @@ func (c *ListCommand) Run(args []string) int {
 		return 1
 	}
 
-	var credentialRecord credentialRecords
+	var credentialRecord []models.Credential
 
 	err = json.Unmarshal(body, &credentialRecord)
+
+	fmt.Println(string(body))
 
 	data := [][]string{}
 	for i := range credentialRecord {
@@ -69,7 +72,7 @@ func (c *ListCommand) Run(args []string) int {
 		if err != nil {
 			log.Println(err.Error())
 		}
-		// fmt.Println(t)
+
 		data = append(data, []string{credentialRecord[i].CredentialID, credentialRecord[i].ServiceName, credentialRecord[i].UpdatedAt})
 	}
 
@@ -84,15 +87,15 @@ func (c *ListCommand) Run(args []string) int {
 }
 
 func (c *ListCommand) Help() string {
-	return "Ex) passman lock"
+	return "Ex) passman list"
 }
 
 func (c *ListCommand) Synopsis() string {
-	return "lock the config file"
+	return "List all the services you've stored in passman"
 }
 
-type credentialRecords []struct {
-	CredentialID string
-	ServiceName  string
-	UpdatedAt    string
-}
+// type credentialRecords []struct {
+// 	CredentialID string
+// 	ServiceName  string
+// 	UpdatedAt    string
+// }
