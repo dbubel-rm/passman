@@ -5,11 +5,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"os"
 	"strings"
 
 	"github.com/mitchellh/cli"
-	"golang.org/x/crypto/ssh/terminal"
 )
 
 type LockCommand struct {
@@ -22,6 +20,7 @@ func (c *LockCommand) Run(args []string) int {
 	cfg, err := getConfigInfo()
 
 	if err != nil {
+		c.UI.Error("Maybe you already locked passman?")
 		c.UI.Error(err.Error())
 		return 1
 	}
@@ -33,16 +32,20 @@ func (c *LockCommand) Run(args []string) int {
 		return 1
 	}
 
-	fmt.Print("Password: ")
-	bytePassword, err := terminal.ReadPassword(int(os.Stdin.Fd()))
+	fmt.Println("Enter Encryption phrase twice")
+	password, err := c.UI.AskSecret("=>")
 
 	if err != nil {
 		c.UI.Error(err.Error())
 		return 1
 	}
 
-	password := CleanInput(string(bytePassword))
-	fmt.Println("")
+	password2, err := c.UI.AskSecret("=>")
+
+	if password != password2 {
+		c.UI.Error("Encryption phrases do not match")
+		return 1
+	}
 
 	enc := Encrypt(dat, password)
 

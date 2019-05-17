@@ -17,6 +17,7 @@ func API(log *log.Logger, db *db.MySQLDB, auth web.Middleware) http.Handler {
 	check := Check{
 		MasterDB: db.Database,
 	}
+	app.Router.NotFound = goAway(log)
 
 	app.Handle("GET", "/health", check.Health)
 
@@ -55,4 +56,11 @@ func API(log *log.Logger, db *db.MySQLDB, auth web.Middleware) http.Handler {
 	// TODO: get credentials by ID
 
 	return app
+}
+
+func goAway(l *log.Logger) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		log.Printf("%s -> %d -> %s -> %s", r.Method, r.ContentLength, r.RemoteAddr, r.RequestURI)
+		w.WriteHeader(http.StatusNotFound)
+	})
 }

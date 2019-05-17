@@ -20,6 +20,11 @@ func (c *RandCommand) Run(args []string) int {
 	cmdFlags.IntVar(&c.Length, "l", 0, "Length")
 	cmdFlags.Parse(args)
 
+	if c.Length == 0 {
+		c.UI.Warn(c.Help())
+		return 1
+	}
+
 	n, _ := utils.GenerateRandomString(c.Length)
 
 	data := [][]string{
@@ -35,7 +40,7 @@ func (c *RandCommand) Run(args []string) int {
 }
 
 func (c *RandCommand) Help() string {
-	return "passman rand -l 20"
+	return "passman rand -l <length>"
 }
 
 func (c *RandCommand) Synopsis() string {

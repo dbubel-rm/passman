@@ -17,36 +17,13 @@ func fileExists(filename string) bool {
 	return !info.IsDir()
 }
 func main() {
-
-	// passmanHome := usr.HomeDir + "/.passman/session.json"
-
-	// if os.Getenv(commands.PASSMAN_MASTER) == "" {
-	// 	// master := getUsernameAndPassword()
-	// 	os.Setenv(commands.PASSMAN_MASTER, master)
-	// }
-
-	// f, err := os.Create("/tmp/dat2")
-
-	// _, err = os.Stat(passmanHome)
-
-	// if err != nil {
-	// 	fmt.Println(err.Error())
-	// }
-	// if os.IsNotExist(err) {
-	// 	fmt.Println("trying to create")
-	// 	_, e := os.Create(commands.PassmanHome)
-	// 	if e != nil {
-	// 		fmt.Println("bad create", e.Error())
-	// 	}
-	// }
-
 	ui := &cli.BasicUi{
 		Reader:      os.Stdin,
 		Writer:      os.Stdout,
 		ErrorWriter: os.Stderr,
 	}
 
-	c := cli.NewCLI("passman cli", "0.0.1")
+	c := cli.NewCLI("passman cli", "1.0.0")
 
 	usr, _ := user.Current()
 	c.Args = os.Args[1:]
@@ -135,6 +112,7 @@ func main() {
 					Ui:          ui,
 					OutputColor: cli.UiColorBlue,
 					ErrorColor:  cli.UiColorRed,
+					WarnColor:   cli.UiColorGreen,
 				},
 			}, nil
 		},
