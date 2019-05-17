@@ -85,6 +85,15 @@ func (c *LoginCommand) Run(args []string) int {
 		return 1
 	}
 
+	// Write the config file with any updated params
+	var w models.Config
+	w.Backend = c.Hostname
+	w.Password = c.Password
+	w.Username = c.Username
+
+	dat, _ := json.Marshal(w)
+	err := ioutil.WriteFile(c.UserHome+"/.passman/config.json", dat, 0644)
+
 	payload := `{"email":"%s","password":"%s","returnSecureToken": true}`
 	payload = fmt.Sprintf(payload, c.Username, c.Password)
 	req, _ := http.NewRequest("GET", c.Hostname+"/v1/signin", strings.NewReader(payload))
