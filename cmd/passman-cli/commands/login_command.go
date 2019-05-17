@@ -53,7 +53,7 @@ func (c *LoginCommand) Run(args []string) int {
 	cmdFlags := flag.NewFlagSet("login", flag.ContinueOnError)
 	cmdFlags.StringVar(&c.Username, "u", "", "Email address")
 	cmdFlags.StringVar(&c.Password, "p", "", "Password")
-	cmdFlags.StringVar(&c.Hostname, "h", "", "Hostname")
+	cmdFlags.StringVar(&c.Hostname, "hostname", "", "Hostname")
 	cmdFlags.Parse(args)
 
 	cfg, _ := getConfigInfo()
@@ -122,7 +122,7 @@ func (c *LoginCommand) Run(args []string) int {
 }
 
 func (c *LoginCommand) Help() string {
-	return "passman login -u <example@email.com> -p <password>"
+	return "passman login -u <example@email.com> -p <password> -hostname <https://somehost.som>"
 }
 
 func (c *LoginCommand) Synopsis() string {
