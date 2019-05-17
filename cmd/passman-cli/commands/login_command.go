@@ -43,6 +43,7 @@ func getSessionInfo() (models.FirebaseSession, error) {
 type LoginCommand struct {
 	Username string
 	Password string
+	Hostname string
 	Ui       cli.Ui
 	UserHome string
 }
@@ -52,6 +53,7 @@ func (c *LoginCommand) Run(args []string) int {
 	cmdFlags := flag.NewFlagSet("login", flag.ContinueOnError)
 	cmdFlags.StringVar(&c.Username, "u", "", "Email address")
 	cmdFlags.StringVar(&c.Password, "p", "", "Password")
+	cmdFlags.StringVar(&c.Hostname, "h", "", "Hostname")
 	cmdFlags.Parse(args)
 
 	cfg, _ := getConfigInfo()
@@ -70,6 +72,15 @@ func (c *LoginCommand) Run(args []string) int {
 	}
 
 	if c.Password == "" {
+		c.Ui.Error(c.Help())
+		return 1
+	}
+
+	if c.Hostname == "" {
+		c.Hostname = cfg.Backend
+	}
+
+	if c.Hostname == "" {
 		c.Ui.Error(c.Help())
 		return 1
 	}

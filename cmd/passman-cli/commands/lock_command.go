@@ -58,7 +58,7 @@ func (c *LockCommand) Run(args []string) int {
 }
 
 func (c *LockCommand) Help() string {
-	return "Ex) passman lock"
+	return "Ex) passman lock -  use an easy to remember password that is still strong"
 }
 
 func (c *LockCommand) Synopsis() string {
