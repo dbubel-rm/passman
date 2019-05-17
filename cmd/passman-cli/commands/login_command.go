@@ -87,7 +87,7 @@ func (c *LoginCommand) Run(args []string) int {
 
 	payload := `{"email":"%s","password":"%s","returnSecureToken": true}`
 	payload = fmt.Sprintf(payload, c.Username, c.Password)
-	req, _ := http.NewRequest("GET", cfg.Backend+"/v1/signin", strings.NewReader(payload))
+	req, _ := http.NewRequest("GET", c.Hostname+"/v1/signin", strings.NewReader(payload))
 
 	client := &http.Client{}
 	res, err := client.Do(req)
