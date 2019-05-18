@@ -18,6 +18,7 @@ import (
 	"github.com/dbubel/passman/cmd/passman-api/handlers"
 	"github.com/dbubel/passman/internal/platform/db"
 	"github.com/kelseyhightower/envconfig"
+	"encoding/json"
 )
 
 var (
@@ -56,7 +57,10 @@ func main() {
 	if err := envconfig.Process("PASSMAN", &cfg); err != nil {
 		log.Fatalf("Parsing Config : %v", err)
 	}
-	// cfgJSON, err := json.MarshalIndent(cfg, "", "    ")
+	var err error
+	cfgJSON, err := json.MarshalIndent(cfg, "", "    ")
+	fmt.Println(cfgJSON)
+
 	connStr := fmt.Sprintf("%s:%s@tcp(%s:3306)/%s", cfg.DB.Username, cfg.DB.Password, cfg.DB.Host, cfg.DB.Database)
 	log.Println("Passman server starting", BUILD)
 	// =========================================================================
@@ -65,7 +69,7 @@ func main() {
 	log.Println("Initialize MySQL...")
 
 	var masterDB *db.MySQLDB
-	var err error
+
 	for i := 0; i < 30; i++ {
 		masterDB, err = db.New(connStr)
 		if err != nil {
