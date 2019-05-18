@@ -15,10 +15,10 @@ import (
 
 	"github.com/dbubel/passman/internal/mid"
 
+	"encoding/json"
 	"github.com/dbubel/passman/cmd/passman-api/handlers"
 	"github.com/dbubel/passman/internal/platform/db"
 	"github.com/kelseyhightower/envconfig"
-	"encoding/json"
 )
 
 var (
@@ -45,6 +45,8 @@ func main() {
 			WriteTimeout    time.Duration `default:"5s" envconfig:"WRITE_TIMEOUT"`
 			ShutdownTimeout time.Duration `default:"5s" envconfig:"SHUTDOWN_TIMEOUT"`
 			EnableTLS       string        `default:"yes" envconfig:"ENABLE_TLS"`
+			FullChain       string        `default:"" envconfig:"FULLCHAIN"`
+			PrivateKey      string        `default:"yes" envconfig:"PRIVATE_KEY"`
 		}
 		DB struct {
 			Host     string `default:"host.docker.internal" envconfig:"MYSQL_ENDPOINT"`
@@ -105,9 +107,9 @@ func main() {
 		} else {
 			fmt.Println("TLS ON")
 			serverErrors <- api.ListenAndServeTLS(
-				"/etc/letsencrypt/live/engineerbeard.com/fullchain.pem",
-				"/etc/letsencrypt/live/engineerbeard.com/privkey.pem",
-				)
+				cfg.Web.FullChain,
+				cfg.Web.PrivateKey,
+			)
 		}
 	}()
 

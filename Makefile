@@ -25,6 +25,8 @@ start:
 	MYSQL_PASSWORD=${MYSQL_PASSWORD} \
 	MYSQL_DB=${MYSQL_DB} \
 	ENABLE_TLS=on \
+	FULLCHAIN=${FULLCHAIN} \
+	PRIVATEKEY=${PRIVATEKEY} \
 	docker-compose -f docker-compose.prod.yaml up --scale passman-api=2 --build -d
 stop:
 	docker-compose -f docker-compose.prod.yaml down
