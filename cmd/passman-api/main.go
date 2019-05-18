@@ -44,7 +44,7 @@ func main() {
 			ReadTimeout     time.Duration `default:"5s" envconfig:"READ_TIMEOUT"`
 			WriteTimeout    time.Duration `default:"5s" envconfig:"WRITE_TIMEOUT"`
 			ShutdownTimeout time.Duration `default:"5s" envconfig:"SHUTDOWN_TIMEOUT"`
-			EnableTLS       string        `default:"no" envconfig:"ENABLE_TLS"`
+			EnableTLS       string        `default:"yes" envconfig:"ENABLE_TLS"`
 		}
 		DB struct {
 			Host     string `default:"host.docker.internal" envconfig:"MYSQL_ENDPOINT"`
@@ -59,7 +59,7 @@ func main() {
 	}
 	var err error
 	cfgJSON, err := json.MarshalIndent(cfg, "", "    ")
-	fmt.Println(cfgJSON)
+	fmt.Println(string(cfgJSON))
 
 	connStr := fmt.Sprintf("%s:%s@tcp(%s:3306)/%s", cfg.DB.Username, cfg.DB.Password, cfg.DB.Host, cfg.DB.Database)
 	log.Println("Passman server starting", BUILD)
