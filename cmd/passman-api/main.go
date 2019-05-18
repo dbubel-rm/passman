@@ -21,7 +21,7 @@ import (
 )
 
 var (
-	BUILD         = "develop-11"
+	BUILD         = "develop-12"
 	GIT_HASH      = ""
 	BUILD_DATE    = ""
 	INSTANCE_NAME = ""
@@ -100,7 +100,10 @@ func main() {
 			serverErrors <- api.ListenAndServe()
 		} else {
 			fmt.Println("TLS ON")
-			serverErrors <- api.ListenAndServeTLS("MyCertificate.crt", "MyKey.key")
+			serverErrors <- api.ListenAndServeTLS(
+				"/etc/letsencrypt/live/engineerbeard.com/fullchain.pem",
+				"/etc/letsencrypt/live/engineerbeard.com/privkey.pem",
+				)
 		}
 	}()
 

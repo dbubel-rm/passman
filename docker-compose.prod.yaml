@@ -5,6 +5,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    volumes:
+      - /etc/letsencrypt:/etc/letsencrypt
     environment:
       - MYSQL_ENDPOINT
       - MYSQL_USERNAME

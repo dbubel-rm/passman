@@ -24,6 +24,7 @@ start:
 	MYSQL_USERNAME=${MYSQL_USERNAME} \
 	MYSQL_PASSWORD=${MYSQL_PASSWORD} \
 	MYSQL_DB=${MYSQL_DB} \
+	ENABLE_TLS=on \
 	docker-compose -f docker-compose.prod.yaml up --scale passman-api=2 --build -d
 stop:
 	docker-compose -f docker-compose.prod.yaml down
