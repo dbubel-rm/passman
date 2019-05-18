@@ -46,7 +46,7 @@ func main() {
 			ShutdownTimeout time.Duration `default:"5s" envconfig:"SHUTDOWN_TIMEOUT"`
 			EnableTLS       string        `default:"yes" envconfig:"ENABLE_TLS"`
 			FullChain       string        `default:"" envconfig:"FULLCHAIN"`
-			PrivateKey      string        `default:"yes" envconfig:"PRIVATE_KEY"`
+			PrivateKey      string        `default:"" envconfig:"PRIVATEKEY"`
 		}
 		DB struct {
 			Host     string `default:"host.docker.internal" envconfig:"MYSQL_ENDPOINT"`
