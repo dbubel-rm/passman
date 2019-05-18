@@ -4,7 +4,6 @@ import (
 	"flag"
 	"os"
 
-	"github.com/dbubel/passman/cmd/passman-cli-legacy/utils"
 	"github.com/mitchellh/cli"
 	"github.com/olekukonko/tablewriter"
 )
@@ -25,7 +24,7 @@ func (c *RandCommand) Run(args []string) int {
 		return 1
 	}
 
-	n, _ := utils.GenerateRandomString(c.Length)
+	n, _ := GenerateRandomString(c.Length)
 
 	data := [][]string{
 		{n},

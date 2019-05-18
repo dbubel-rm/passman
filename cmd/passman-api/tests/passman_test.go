@@ -88,7 +88,7 @@ func TestPassman(t *testing.T) {
 	// Test create user
 	a = handlers.API(l, d, f).(*web.App)
 
-	r = httptest.NewRequest("POST", "/v1/users", strings.NewReader(`{"email":"dean@dean.com","password":"test123","returnSecureToken":true}`))
+	r = httptest.NewRequest("POST", "/v1/users", strings.NewReader(`{"email":"test@test.com","password":"test123","returnSecureToken":true}`))
 	w = httptest.NewRecorder()
 
 	a.ServeHTTP(w, r)
@@ -110,7 +110,7 @@ func TestPassman(t *testing.T) {
 
 	// Test signin
 	a = handlers.API(l, d, f).(*web.App)
-	r = httptest.NewRequest("GET", "/v1/signin", strings.NewReader(`{"email":"dean@dean.com","password":"test123","returnSecureToken":true}`))
+	r = httptest.NewRequest("GET", "/v1/signin", strings.NewReader(`{"email":"test@test.com","password":"test123","returnSecureToken":true}`))
 	w = httptest.NewRecorder()
 
 	a.ServeHTTP(w, r)
@@ -126,7 +126,7 @@ func TestPassman(t *testing.T) {
 
 	// Test create credential
 	a = handlers.API(l, d, f).(*web.App)
-	r = httptest.NewRequest("POST", "/v1/credential", strings.NewReader(`{"username":"dean@dean.com","password":"test123","serviceName":"test_service"}`))
+	r = httptest.NewRequest("POST", "/v1/credential", strings.NewReader(`{"username":"test@test.com","password":"test123","serviceName":"test_service"}`))
 	tt = fmt.Sprintf("Bearer %s", s.IdToken)
 	r.Header.Set("Authorization", tt)
 	w = httptest.NewRecorder()
@@ -231,7 +231,7 @@ func TestPassman(t *testing.T) {
 
 	// Test signin Again
 	a = handlers.API(l, d, f).(*web.App)
-	r = httptest.NewRequest("GET", "/v1/signin", strings.NewReader(`{"email":"dean@dean.com","password":"newPAssword","returnSecureToken":true}`))
+	r = httptest.NewRequest("GET", "/v1/signin", strings.NewReader(`{"email":"test@test.com","password":"newPAssword","returnSecureToken":true}`))
 	w = httptest.NewRecorder()
 
 	a.ServeHTTP(w, r)
@@ -243,7 +243,7 @@ func TestPassman(t *testing.T) {
 
 	// Test signin with wrong pass
 	a = handlers.API(l, d, f).(*web.App)
-	r = httptest.NewRequest("GET", "/v1/signin", strings.NewReader(`{"email":"dean@dean.com","password":"newPAss","returnSecureToken":true}`))
+	r = httptest.NewRequest("GET", "/v1/signin", strings.NewReader(`{"email":"test@test.com","password":"newPAss","returnSecureToken":true}`))
 	w = httptest.NewRecorder()
 
 	a.ServeHTTP(w, r)

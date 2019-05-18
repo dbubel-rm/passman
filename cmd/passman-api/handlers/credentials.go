@@ -17,7 +17,7 @@ type Credentials struct {
 }
 
 func (c *Credentials) add(log *log.Logger, w http.ResponseWriter, r *http.Request, params httprouter.Params) error {
-	var add credentials.Add
+	var add credentials.Credential
 
 	if err := web.Unmarshal(r.Body, &add); err != nil {
 		return err
@@ -58,7 +58,7 @@ func (c *Credentials) delete(log *log.Logger, w http.ResponseWriter, r *http.Req
 }
 
 func (c *Credentials) update(log *log.Logger, w http.ResponseWriter, r *http.Request, params httprouter.Params) error {
-	var update credentials.Update
+	var update credentials.Credential
 
 	if err := web.Unmarshal(r.Body, &update); err != nil {
 		return err

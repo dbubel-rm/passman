@@ -14,7 +14,7 @@ type MySQLDB struct {
 }
 
 func New(url string) (*MySQLDB, error) {
-	 	
+
 	// db, err := sqlx.Connect("mysql", "passman:wtfthispasswordNeedsLonger29@tcp(production-database.cfneifgjtyib.us-east-1.rds.amazonaws.com:3306)/passman")
 	mysql, err := sqlx.Connect("mysql", url)
 

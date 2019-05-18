@@ -23,21 +23,12 @@ const (
 )
 
 var publicPEM map[string]string
-
-// Used only for integration tests
-func FakeAuth(before web.Handler) web.Handler {
-	return func(log *log.Logger, w http.ResponseWriter, r *http.Request, params httprouter.Params) error {
-		ctx := context.WithValue(r.Context(), "localId", "fake")
-		err := before(log, w, r.WithContext(ctx), params)
-		return err
-	}
-}
-
 var keyDownloadedAt time.Time
 
 func init() {
 	getKey()
 }
+
 func getKey() error {
 	var err error
 	var respBody []byte
@@ -61,6 +52,15 @@ func getKey() error {
 	}
 	keyDownloadedAt = time.Now()
 	return nil
+}
+
+// Used only for integration tests
+func FakeAuth(before web.Handler) web.Handler {
+	return func(log *log.Logger, w http.ResponseWriter, r *http.Request, params httprouter.Params) error {
+		ctx := context.WithValue(r.Context(), "localId", "fake")
+		err := before(log, w, r.WithContext(ctx), params)
+		return err
+	}
 }
 
 // AuthHandler validates a JWT present in the request.
@@ -102,13 +102,12 @@ func AuthHandler(before web.Handler) web.Handler {
 			return errors.New("no valid token found")
 		}
 
-		// email, ok := tok.Claims.(jwt.MapClaims)["email"].(string)
-		// if email != "test@gmail.com" {
-		// 	emailVerified, ok := tok.Claims.(jwt.MapClaims)["email_verified"].(bool)
-		// 	if emailVerified != true || !ok {
-		// 		return errors.New("Email not verified")
-		// 	}
-		// }
+		//email, ok := tok.Claims.(jwt.MapClaims)["email"].(string)
+
+		emailVerified, ok := tok.Claims.(jwt.MapClaims)["email_verified"].(bool)
+		if emailVerified != true || !ok {
+			return errors.New("Email not verified")
+		}
 
 		iss, ok := tok.Claims.(jwt.MapClaims)["iss"].(string)
 		if iss != JWT_ISSUER || !ok {

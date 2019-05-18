@@ -4,7 +4,7 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-func AddCredentialDB(dbConn *sqlx.DB, cred *Add, localID interface{}) error {
+func AddCredentialDB(dbConn *sqlx.DB, cred *Credential, localID interface{}) error {
 	_, err := dbConn.Exec(`INSERT INTO credentials (local_id, service_name, username, password) values (?, ?, ?, ?)`,
 		localID, cred.ServiceName, cred.Username, cred.Password)
 	return err
@@ -29,8 +29,8 @@ func UpdateCredentialDB(dbConn *sqlx.DB, serviceName, password string, localID i
 	return err
 }
 
-func GetServicesDB(dbConn *sqlx.DB, localID interface{}) (*[]Service, error) {
-	var serviceList []Service
+func GetServicesDB(dbConn *sqlx.DB, localID interface{}) (*[]Credential, error) {
+	var serviceList []Credential
 	err := dbConn.Select(&serviceList, `SELECT credential_id, service_name, updated_at FROM credentials WHERE local_id = ?`, localID)
 	return &serviceList, err
 }
