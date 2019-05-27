@@ -21,8 +21,8 @@ func (c *AddCommand) Run(args []string) int {
 
 	cmdFlags := flag.NewFlagSet("add", flag.ContinueOnError)
 	cmdFlags.StringVar(&c.ServiceName, "service", "", "Service name")
-	cmdFlags.StringVar(&c.UserName, "p", "", "Username")
-	cmdFlags.StringVar(&c.Password, "u", "", "Password")
+	cmdFlags.StringVar(&c.UserName, "u", "", "Username")
+	cmdFlags.StringVar(&c.Password, "p", "", "Password")
 	cmdFlags.Parse(args)
 
 	if c.ServiceName == "" || c.Password == "" || c.UserName == "" {

@@ -21,7 +21,7 @@ var (
 	// ErrValidation occurs when there are validation errors.
 	ErrValidation = errors.New("Validation errors occurred")
 
-	// ErrUnauthorized occurs when there was an issue validing the client's
+	// ErrUnauthorized occurs when there was an issue validing the client-legacy's
 	// credentials.
 	ErrUnauthorized = errors.New("Unauthorized")
 
@@ -79,7 +79,7 @@ func RespondError(log *log.Logger, w http.ResponseWriter, err error, code int) {
 	Respond(log, w, JSONError{Error: err.Error()}, code)
 }
 
-// Respond sends JSON to the client.
+// Respond sends JSON to the client-legacy.
 // If code is StatusNoContent, v is expected to be nil.
 func Respond(log *log.Logger, w http.ResponseWriter, data interface{}, code int) {
 
@@ -104,6 +104,6 @@ func Respond(log *log.Logger, w http.ResponseWriter, data interface{}, code int)
 	// Write the status code to the response and context.
 	w.WriteHeader(code)
 
-	// Send the result back to the client.
+	// Send the result back to the client-legacy.
 	w.Write(jsonData)
 }

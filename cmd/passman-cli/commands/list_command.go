@@ -60,8 +60,6 @@ func (c *ListCommand) Run(args []string) int {
 
 	err = json.Unmarshal(body, &credentialRecord)
 
-	fmt.Println(string(body))
-
 	data := [][]string{}
 	for i := range credentialRecord {
 

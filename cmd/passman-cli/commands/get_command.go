@@ -71,6 +71,7 @@ func (c *GetCommand) Run(args []string) int {
 
 	credentialRecord := models.Credential{}
 	err = json.Unmarshal(body, &credentialRecord)
+	fmt.Println(credentialRecord)
 
 	if err != nil {
 		c.UI.Error(err.Error())
@@ -104,6 +105,7 @@ func (c *GetCommand) Run(args []string) int {
 	data := [][]string{
 		[]string{c.ServiceName, credentialRecord.Username, credentialRecord.Password},
 	}
+	fmt.Println(c.ServiceName, credentialRecord.Username, credentialRecord.Password)
 
 	table := tablewriter.NewWriter(os.Stdout)
 	table.SetHeader([]string{"service name", "username", "password"})
