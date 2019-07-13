@@ -3,7 +3,6 @@ package handlers
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 
@@ -133,7 +132,6 @@ func (f *Firebase) ChangePassword(log *log.Logger, w http.ResponseWriter, r *htt
 		return err
 	}
 
-	fmt.Println(firebaseResp)
 	web.Respond(log, w, firebaseResp, res.StatusCode)
 	return nil
 }
