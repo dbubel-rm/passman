@@ -15,8 +15,6 @@ import (
 
 	"github.com/dbubel/passman/internal/mid"
 
-	"encoding/json"
-
 	"github.com/dbubel/passman/cmd/passman-api/handlers"
 	"github.com/dbubel/passman/internal/platform/db"
 	"github.com/kelseyhightower/envconfig"
@@ -61,7 +59,7 @@ func main() {
 		log.Fatalf("Parsing Config : %v", err)
 	}
 	var err error
-	cfgJSON, err := json.MarshalIndent(cfg, "", "    ")
+	// cfgJSON, err := json.MarshalIndent(cfg, "", "    ")
 	// fmt.Println(string(cfgJSON))
 
 	connStr := fmt.Sprintf("%s:%s@tcp(%s:3306)/%s", cfg.DB.Username, cfg.DB.Password, cfg.DB.Host, cfg.DB.Database)
