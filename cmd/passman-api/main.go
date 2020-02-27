@@ -106,8 +106,8 @@ func main() {
 		} else {
 			fmt.Println("TLS ON")
 			serverErrors <- api.ListenAndServeTLS(
-				"/etc/letsencrypt/live/engineerbeard.com/fullchain.pem",
-				"/etc/letsencrypt/live/engineerbeard.com/privkey.pem",
+				"/etc/letsencrypt/live/engineerbeard.com-0001/fullchain.pem",
+				"/etc/letsencrypt/live/engineerbeard.com-0001/privkey.pem",
 			)
 		}
 	}()
