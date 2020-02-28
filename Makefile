@@ -27,7 +27,7 @@ start:
 	ENABLE_TLS=on \
 	FULLCHAIN="${FULLCHAIN}" \
 	PRIVATEKEY="${PRIVATEKEY}" \
-	docker-compose pull && docker-compose -f docker-compose.prod.yaml up --scale passman-api=2 --build -d
+	docker-compose -f docker-compose.prod.yaml up --scale passman-api=2 --pull --build -d
 stop:
 	docker-compose -f docker-compose.prod.yaml down
 
