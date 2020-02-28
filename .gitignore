@@ -26,3 +26,5 @@ production_key
 *.tfstate.*
 crash.log
 *.tfvars
+
+/cmd/passman-api/dist
