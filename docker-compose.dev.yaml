@@ -4,7 +4,7 @@ services:
     restart: always
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: cmd/passman-api/Dockerfile
     # environment:
     #   - NAME="Instance 1"
 

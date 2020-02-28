@@ -1,8 +1,8 @@
 build:
-	go build -ldflags "\
-              -X main.BUILD_GIT_HASH=`git rev-parse HEAD` \
-              -X main.BUILD_DATE=`date -u +'%Y-%m-%dT%H:%M:%SZ'`" \
-              -v -o passman main.go
+	go build -ldflags "/
+		  -X main.BUILD_GIT_HASH=`git rev-parse HEAD` /
+		  -X main.BUILD_DATE=`date -u +'%Y-%m-%dT%H:%M:%SZ'`" /
+		  -v -o passman main.go
 
 test:
 	docker-compose -f docker-compose.yaml up --build --abort-on-container-exit
@@ -31,4 +31,5 @@ start:
 stop:
 	docker-compose -f docker-compose.prod.yaml down
 
-.PHONY: test test-local run build deploy run-dev stop-dev start stop
+
+.PHONY: nginx test test-local run build deploy run-dev stop-dev start stop

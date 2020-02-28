@@ -2,9 +2,7 @@ version: '2'
 services:
   passman-api:
     restart: always
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: stihl29/passman
     volumes:
       - /etc/letsencrypt:/etc/letsencrypt
     environment:
@@ -17,9 +15,7 @@ services:
     depends_on:
       - passman-api
     restart: always
-    build:
-      context: .
-      dockerfile: Dockerfile.prod.nginx
+    image: stihl29/nginx
     volumes:
       - /etc/letsencrypt:/etc/letsencrypt
     ports:
